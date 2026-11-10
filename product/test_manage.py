@@ -78,6 +78,51 @@ class ManifestTests(unittest.TestCase):
         ):
             manage.checked_files()
 
+    def test_single_product_batch_uses_explicit_manifest_scope(self):
+        self.entries = self.entries[:1]
+        self.manifest.write_text(
+            json.dumps(
+                {
+                    "source_root": str(self.source),
+                    "expected_product_count": 1,
+                    "documents": self.entries,
+                }
+            )
+        )
+        with patch.object(manage, "MANIFEST", self.manifest):
+            self.assertEqual(len(manage.checked_files()), 1)
+
+    def test_prepared_input_tampering_is_rejected(self):
+        payload = self.source.parent / "prepared.json"
+        payload.write_text(json.dumps({"file_source": "0.txt", "text": "fixture"}))
+        self.entries[0].update(
+            prepared_path=payload.name,
+            prepared_sha256=hashlib.sha256(payload.read_bytes()).hexdigest(),
+        )
+        self.write_manifest()
+        payload.write_text("changed")
+        with (
+            patch.object(manage, "MANIFEST", self.manifest),
+            patch.object(manage, "OUTPUT", self.source.parent),
+            self.assertRaises(ValueError),
+        ):
+            manage.checked_files()
+
+    def test_prepared_source_identity_mismatch_is_rejected(self):
+        payload = self.source.parent / "prepared.json"
+        payload.write_text(json.dumps({"file_source": "other.txt", "text": "fixture"}))
+        self.entries[0].update(
+            prepared_path=payload.name,
+            prepared_sha256=hashlib.sha256(payload.read_bytes()).hexdigest(),
+        )
+        self.write_manifest()
+        with (
+            patch.object(manage, "MANIFEST", self.manifest),
+            patch.object(manage, "OUTPUT", self.source.parent),
+            self.assertRaises(ValueError),
+        ):
+            manage.checked_files()
+
 
 if __name__ == "__main__":
     unittest.main()

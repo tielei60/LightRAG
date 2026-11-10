@@ -20,10 +20,13 @@ OUTPUT = ROOT / "output" / "first3"
 PID_FILE = OUTPUT / "server.pid"
 MANIFEST = OUTPUT / "manifest.json"
 RECEIPTS = OUTPUT / "uploads.json"
+CONFIG_FILE = ROOT / ".env"
 
 
 def settings() -> dict[str, str | None]:
-    return dict(dotenv_values(ROOT / ".env", interpolate=False))
+    if not CONFIG_FILE.is_file():
+        raise ValueError("Selected batch configuration is missing")
+    return dict(dotenv_values(CONFIG_FILE, interpolate=False))
 
 
 def base_url() -> str:
@@ -43,8 +46,12 @@ def checked_files() -> list[tuple[Path, dict]]:
     manifest = json.loads(MANIFEST.read_text())
     source = Path(manifest["source_root"]).resolve(strict=True)
     documents = manifest["documents"]
-    if len({entry["product"] for entry in documents}) != 3:
-        raise ValueError("This batch must contain exactly three products")
+    expected = manifest.get("expected_product_count", 3)
+    if (
+        expected not in (1, 3)
+        or len({entry["product"] for entry in documents}) != expected
+    ):
+        raise ValueError("Product scope does not match the selected manifest")
     files = []
     names: set[str] = set()
     for entry in documents:
@@ -56,11 +63,23 @@ def checked_files() -> list[tuple[Path, dict]]:
         if path.name in names:
             raise ValueError("Duplicate upload filenames are not allowed")
         names.add(path.name)
+        if "prepared_path" in entry:
+            prepared = (OUTPUT / entry["prepared_path"]).resolve(strict=True)
+            if not prepared.is_relative_to(OUTPUT.resolve()):
+                raise ValueError("Prepared input escapes the batch directory")
+            if (
+                hashlib.sha256(prepared.read_bytes()).hexdigest()
+                != entry["prepared_sha256"]
+            ):
+                raise ValueError("Prepared input changed")
+            if json.loads(prepared.read_text()).get("file_source") != path.name:
+                raise ValueError("Prepared input source does not match the manifest")
         files.append((path, entry))
     return files
 
 
 def start() -> None:
+    base_url()
     if PID_FILE.exists():
         try:
             os.kill(int(PID_FILE.read_text()), 0)
@@ -69,16 +88,22 @@ def start() -> None:
         else:
             raise RuntimeError("Recorded server is already running; use status")
     OUTPUT.mkdir(parents=True, exist_ok=True)
-    with (ROOT / "output" / "server.log").open("ab") as log:
+    log_path = (
+        ROOT / "output/server.log" if OUTPUT.name == "first3" else OUTPUT / "server.log"
+    )
+    environment = os.environ.copy()
+    environment.update({k: v for k, v in settings().items() if v is not None})
+    with log_path.open("ab") as log:
         process = subprocess.Popen(
             [str(ROOT / ".venv/bin/lightrag-server")],
             cwd=ROOT,
             stdout=log,
             stderr=subprocess.STDOUT,
             start_new_session=True,
+            env=environment,
         )
     PID_FILE.write_text(str(process.pid))
-    print(f"Started PID {process.pid}; log: output/server.log")
+    print(f"Started PID {process.pid}; log: {log_path.relative_to(ROOT)}")
 
 
 def status() -> None:
@@ -109,6 +134,9 @@ def stop() -> None:
 
 def import_batch(apply: bool) -> None:
     files = checked_files()
+    manifest = json.loads(MANIFEST.read_text())
+    if "workspace" in manifest and manifest["workspace"] != settings()["WORKSPACE"]:
+        raise ValueError("Batch configuration does not match the manifest workspace")
     print(
         json.dumps(
             {
@@ -153,10 +181,18 @@ def import_batch(apply: bool) -> None:
             }
             receipts.append(receipt)
             save_json(RECEIPTS, receipts)
-            with path.open("rb") as document:
-                response = client.post(
-                    "/documents/upload", files={"file": (path.name, document)}
-                )
+            if "prepared_path" in entry:
+                payload = json.loads((OUTPUT / entry["prepared_path"]).read_text())
+                if payload.get("file_source") != path.name:
+                    raise ValueError(
+                        "Prepared input source does not match the manifest"
+                    )
+                response = client.post("/documents/text", json=payload)
+            else:
+                with path.open("rb") as document:
+                    response = client.post(
+                        "/documents/upload", files={"file": (path.name, document)}
+                    )
             response.raise_for_status()
             receipt.update(state="accepted", response=response.json())
             save_json(RECEIPTS, receipts)
@@ -164,11 +200,23 @@ def import_batch(apply: bool) -> None:
 
 
 def main() -> None:
+    global OUTPUT, PID_FILE, MANIFEST, RECEIPTS, CONFIG_FILE
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--batch", default="first3")
     parser.add_argument(
         "action", choices=["start", "status", "stop", "preview", "import"]
     )
     args = parser.parse_args()
+    if not args.batch or any(
+        c not in "abcdefghijklmnopqrstuvwxyz0123456789_-" for c in args.batch
+    ):
+        raise ValueError("Invalid batch name")
+    OUTPUT = ROOT / "output" / args.batch
+    PID_FILE = OUTPUT / "server.pid"
+    MANIFEST = OUTPUT / "manifest.json"
+    RECEIPTS = OUTPUT / "uploads.json"
+    if args.batch != "first3":
+        CONFIG_FILE = OUTPUT / "runtime.env"
     actions = {
         "start": start,
         "status": status,
