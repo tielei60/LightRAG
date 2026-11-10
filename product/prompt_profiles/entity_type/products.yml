@@ -1,0 +1,27 @@
+entity_types_guidance: |
+  从当前原文中提取有助于检索的实体和直接关系，使用以下类型；不匹配时使用Other。
+  - Product：原文明确的保险产品及版本。
+  - Plan：产品的投保计划或保障组合。
+  - Coverage：保险责任、给付项目或保障范围。
+  - UnderwritingRule：投保条件、核保要求及责任选择约束。
+  - Organization：原文明确的保险公司或相关机构。
+  - Concept：理解条款所需的定义、保险事故或适用条件。
+  - Other：其他确有检索价值但无法归入以上类型的实体。
+
+  只抽取当前原文明确支持的事实，不补猜产品版本、日期、条件或结论。
+  产品专属的计划、责任和规则，名称及描述须保留原文可确定的产品归属，避免把不同产品的“计划一”或同名责任合为同一事实。
+  描述和关系中保留影响意思的主体、适用计划、条件、否定、例外、数值及单位；有条件的给付不能写成无条件给付。
+  核保规则是资料中的规则说明，不构成对个案的核保决定；公式只作为原文说明，不计算保费或现金价值。
+  图谱用于定位相关原文，不需要把每个句子或数值拆成独立实体，也不为了增加数量而生成关系。
+  实体和关系必须能够回溯当前原文；原文未说明的产品归属或限制保持未知。
+entity_extraction_json_examples:
+  - |
+    {
+      "entities": [
+        {"name": "<entity_name>", "type": "<entity_type>", "description": "<description_supported_by_source>"},
+        {"name": "<related_entity_name>", "type": "<entity_type>", "description": "<description_supported_by_source>"}
+      ],
+      "relationships": [
+        {"source": "<entity_name>", "target": "<related_entity_name>", "keywords": "<relationship_keywords>", "description": "<relationship_with_conditions_and_exceptions>"}
+      ]
+    }
