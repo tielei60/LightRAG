@@ -284,11 +284,51 @@ async def test_reference_heading_on_unterminated_final_line_is_rejected_at_eof()
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
+    "tokens",
+    [
+        [
+            "年度合计为[给付的生存保险金 + ",
+            "基本保险金额减少部分对应的现金价值]，",
+            "须符合原文约定的比例上限。[1]",
+        ],
+        ["说明[仅用于解释]，分组[2 + 3]不代表引用。[1]"],
+        ["公式分组[现金价值 × [约定比例]]应保留。[1]"],
+        ["按[2", " + 3]分组说明。[", "1", "]"],
+        ["普通全角分组［仅供说明］应保留。[1]"],
+        ["算式[1/2]和[2 - 1]按分组保留。[1]"],
+    ],
+)
+async def test_formula_and_ordinary_brackets_preserve_real_stream_and_file_citations(
+    tokens,
+):
+    provider = streaming_provider(tokens)
+    events = []
+    stream = await AnswerQuery(provider, record=events.append)(
+        "减保额度如何约定？", system_prompt=source_context(), stream=True
+    )
+    for token in tokens:
+        assert await anext(stream) == token
+    footer = "".join([part async for part in stream])
+    assert footer.endswith("### References\n\n- [1] 甲条款.pdf")
+    assert events[-1]["state"] == "completed"
+    assert events[-1]["provider_answer"] == "".join(tokens)
+    assert events[-1]["cited_ids"] == ["1"]
+    provider.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
     "invalid_tail",
     [
         "未提供来源。[9]",
         "将摘录序号误作引用。[19]",
         "混合编号。[1,2]",
+        "全角编号。［1］",
+        "混合括号。[1］",
+        "非ASCII数字。[１]",
+        "摘录内部编号。[U0019]",
+        "公式不能隐藏引用。[现金价值 × [9]]",
+        "公式不能隐藏摘录编号。[现金价值 × [U0019]]",
         "其他名称。[外部报告]",
         "\n### References\n- [1] 自造文件.pdf",
         "\n参考文献\n外部资料",
@@ -314,7 +354,18 @@ async def test_invalid_citation_or_generated_reference_list_marks_partial_answer
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    "tokens", [[], [""], ["没有引用的模型答复"], ["正文[1]，引用未结束[2\n"]]
+    "tokens",
+    [
+        [],
+        [""],
+        ["没有引用的模型答复"],
+        ["只有公式[2 + 3]没有文件引用"],
+        ["正文[1]，引用未结束[2\n"],
+        ["正文[1]，引用未结束[U", "0019"],
+        ["正文[1]，引用未结束[1,"],
+        ["正文[1]，引用未结束[U0019,"],
+        ["正文[1]，引用未结束[来源："],
+    ],
 )
 async def test_empty_uncited_or_unfinished_answer_is_explicit_failure(tokens):
     provider = streaming_provider(tokens)

@@ -18,7 +18,7 @@ from typing import Any
 
 from product.grounded_query import parse_source_context, provider_limits
 
-ANSWER_CONTRACT_VERSION = "natural-source-answer-v3"
+ANSWER_CONTRACT_VERSION = "natural-source-answer-v4"
 
 ANSWER_SYSTEM_PROMPT = """你是保险产品资料问答助手。根据本次提供的完整原文单元回答当前问题，并结合历史理解追问对象。
 先直接回答用户的核心问题，再用简洁自然的语言说明必要依据、条件和区别；多个子问逐项答全。
@@ -31,6 +31,8 @@ ANSWER_SYSTEM_PROMPT = """你是保险产品资料问答助手。根据本次提
 governing_context逐字提供同一原文片段的上级前提或共有限制。使用正文时须一起核查这些原文，避免割裂条件。
 先在内部拆出每个子问题、比较对象和所问属性，逐项检查依据。相同名称或金额不代表等待期、期限、资格、终止对象也相同。
 基本或可选责任的分类、年龄要求、先选责任和产品各自的适用范围不可省略，也不可跨产品或跨责任套用。
+比较保障计划时，分别核查各计划所属原文区间的完整责任清单；产品级概述、汇总利益或其他计划条目不能用来补全某计划责任。
+对比例、费用或公式的比较，先逐项核对基数、适用对象与条件，再给出相同或不同结论，不能因为同一账户或相同百分比就说计算基数相同。
 允许用自己的话作出有依据的直接判断和比较；原文足以否定问题的前提时，应明确纠正并说明真正的约定。
 表格中的0只适用于对应计划、责任和范围，不能扩大为整个产品不保；空白、破折号、未提供不能自行当成0或正额保障。
 原文列有某项保障，也不能扩大为任何或所有事故均无条件给付；事故范围与给付条件、责任免除、限额须分别核查。
@@ -43,13 +45,24 @@ governing_context逐字提供同一原文片段的上级前提或共有限制。
 
 每项依据原文作出的事实、判断或比较，都在相关句子后原样标注对应文件在source_documents中的键。
 这些文件键是唯一引用标签；同一文件的所有摘录共用它。正文的条款号、章节号、列表序号和出现顺序都不是引用编号。
-需要多个文件时连续标注各自完整标签，不能将编号合并为逗号列表；方括号只用于文件引用，不用脚注或链接格式。
+需要多个文件时连续标注各自完整标签，不能将编号合并为逗号列表；引用不用脚注或链接格式。普通说明或公式可以使用方括号分组，但不能冒充文件引用。
 即使只能说明资料不足，也引用用于核查对象或已有规则的实际资料。不要虚构文档名、编号、外部链接或来源。
 不要生成References、参考文献、来源列表或文件标题；程序会根据实际引用的编号追加来源清单。
 """
 
-_CITATION = re.compile(r"\[([^\]\n]*)\]")
-_DANGLING_CITATION = re.compile(r"\[[^\]]*$")
+_REFERENCE_LABEL = re.compile(
+    r"(?:[uUＵｕ]?\d+(?:(?:\s*[,，、;；]\s*|\s+)[uUＵｕ]?\d+)*"
+    r"|(?:外部|参考|引用|来源)(?:报告|文献|资料|文件)\d*"
+    r"|(?:来源|引用|参考|source|reference)\s*[:：].+"
+    r"|.+\.(?:pdf|docx?|md|txt))",
+    re.IGNORECASE,
+)
+_UNFINISHED_REFERENCE_LABEL = re.compile(
+    r"(?:[uUＵｕ]?\d+(?:(?:\s*[,，、;；]\s*|\s+)[uUＵｕ]?\d+)*"
+    r"\s*[,，、;；]\s*[uUＵｕ]?"
+    r"|(?:来源|引用|参考|source|reference)\s*[:：]\s*)",
+    re.IGNORECASE,
+)
 _REFERENCE_HEADING = re.compile(
     r"^(?:#{1,6}\s*)?(?:references|参考文献|参考资料|引用来源|来源文档|资料来源)\s*[:：]?\s*$",
     re.MULTILINE | re.IGNORECASE,
@@ -58,6 +71,30 @@ _REFERENCE_HEADING = re.compile(
 
 class AnswerError(ValueError):
     """The answer stream or its source citation protocol is incomplete."""
+
+
+def _bracket_groups(text: str) -> tuple[list[tuple[str, str, str]], list[str]]:
+    """Visit inner and outer groups without treating formula text as a label."""
+    stack: list[tuple[int, str]] = []
+    groups: list[tuple[str, str, str]] = []
+    for index, character in enumerate(text):
+        if character in "[［":
+            stack.append((index, character))
+        elif character in "]］" and stack:
+            start, opening = stack.pop()
+            groups.append((opening, text[start + 1 : index], character))
+    return groups, [text[start + 1 :] for start, _ in stack]
+
+
+def _is_reference_label(identifier: str, *, unfinished: bool = False) -> bool:
+    label = identifier.strip()
+    if unfinished and (
+        not label
+        or label in {"u", "U", "ｕ", "Ｕ"}
+        or _UNFINISHED_REFERENCE_LABEL.fullmatch(label) is not None
+    ):
+        return True
+    return _REFERENCE_LABEL.fullmatch(label) is not None
 
 
 def _check_citations(text: str, references: dict[str, str], *, complete=False):
@@ -69,10 +106,14 @@ def _check_citations(text: str, references: dict[str, str], *, complete=False):
     if re.search(r"\[\d+\]\(", text):
         raise AnswerError("问答模型输出了非约定的来源链接，请重试。")
     cited = []
-    for match in _CITATION.finditer(text):
-        identifier = match[1]
+    groups, unfinished_groups = _bracket_groups(text)
+    for opening, identifier, closing in groups:
+        if not _is_reference_label(identifier):
+            continue
         if (
-            not identifier.isascii()
+            opening != "["
+            or closing != "]"
+            or not identifier.isascii()
             or not identifier.isdecimal()
             or identifier not in references
         ):
@@ -82,7 +123,10 @@ def _check_citations(text: str, references: dict[str, str], *, complete=False):
     if complete:
         if not text.strip():
             raise AnswerError("问答模型没有返回正文，请重试。")
-        if _DANGLING_CITATION.search(text):
+        if any(
+            _is_reference_label(identifier, unfinished=True)
+            for identifier in unfinished_groups
+        ):
             raise AnswerError("问答模型的引用编号未完整返回，请重试。")
         if not cited:
             raise AnswerError("问答模型没有提供本次资料的引用编号，请重试。")

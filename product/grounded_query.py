@@ -22,7 +22,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-GROUNDING_CONTRACT_VERSION = "complete-source-unit-selection-v9"
+GROUNDING_CONTRACT_VERSION = "complete-source-unit-selection-v10"
 
 _CHUNKS = re.compile(
     r"^Document Chunks \([^\n]*\):\s*\n```json\s*\n(?P<body>.*?)^```[ \t]*$",
@@ -148,7 +148,7 @@ def _business_regions(
 
 
 def parse_source_context(system_prompt: str) -> SourceContext:
-    """Parse native NDJSON chunks and bind local units to their file references."""
+    """Bind native units to their file, source role and actual governing scope."""
     chunk_blocks, reference_blocks = (
         list(pattern.finditer(system_prompt)) for pattern in (_CHUNKS, _REFERENCES)
     )
@@ -188,10 +188,26 @@ def parse_source_context(system_prompt: str) -> SourceContext:
             else []
         )
         product_name = product_names[0].strip() if len(product_names) == 1 else None
+        regions = _business_regions(row["content"])
+        parent_scope = tuple(
+            (origin_span, row["content"][start:end])
+            for start, end, role, origin_span in regions
+            if role == "structural-parent"
+        )
         current_primary, current_parents = [], []
-        for start, end, role, origin_span in _business_regions(row["content"]):
+        for start, end, role, origin_span in regions:
             text = row["content"][start:end]
-            identity = (reference_id, text)
+            # Identical wording under different plans is separate evidence.
+            # Unknown original offsets cannot establish that two occurrences
+            # are the same source, so only an exact native-chunk repeat merges.
+            identity = (
+                reference_id,
+                role,
+                origin_span,
+                text,
+                parent_scope if role == "primary" else (),
+                row["content"] if origin_span is None else None,
+            )
             if identity in seen:
                 identifier = seen[identity]
             else:

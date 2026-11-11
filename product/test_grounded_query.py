@@ -200,6 +200,126 @@ def test_dependency_closure_deduplicates_and_preserves_source_catalog_order():
     assert answer.count(parent) == 1
 
 
+def test_identical_benefit_text_keeps_each_plans_own_governing_context():
+    body = "【生存保险金】\n按基本保险金额给付生存保险金。"
+    parents = [
+        "保障计划一：\n按以下约定承担责任。",
+        "保障计划二：\n按以下约定承担责任。",
+    ]
+    contents = [
+        wrapped(body)
+        + f"\n【同文件引用原文：structural-parent；Unicode码点{start}:{start + 30}】\n{parent}\n【引用原文结束】"
+        for start, parent in zip((100, 300), parents, strict=True)
+    ]
+    context = parse_source_context(
+        native_prompt([{"reference_id": "1", "content": value} for value in contents])
+    )
+    catalog = {unit.identifier: unit for unit in context.units}
+    benefits = [unit for unit in context.units if unit.role == "primary"]
+    assert len(benefits) == 2
+    assert [unit.text for unit in benefits] == [body, body]
+    for unit, parent, content in zip(benefits, parents, contents, strict=True):
+        assert [catalog[key].text for key in unit.required_unit_ids] == [parent]
+        assert content[unit.source_start : unit.source_end] == body
+
+
+def test_same_named_parent_at_different_source_positions_keeps_scopes_distinct():
+    body, parent = "在各自范围内给付保险金。", "本计划的共同条件。"
+    contents = [
+        wrapped(body)
+        + f"\n【同文件引用原文：structural-parent；Unicode码点{start}:{start + 20}】\n{parent}\n【引用原文结束】"
+        for start in (100, 300)
+    ]
+    context = parse_source_context(
+        native_prompt([{"reference_id": "1", "content": value} for value in contents])
+    )
+    catalog = {unit.identifier: unit for unit in context.units}
+    benefits = [unit for unit in context.units if unit.role == "primary"]
+    assert len(benefits) == 2
+    assert [
+        [catalog[key].original_source_span for key in unit.required_unit_ids]
+        for unit in benefits
+    ] == [[(100, 120)], [(300, 320)]]
+
+
+def test_identical_text_in_primary_and_parent_keeps_both_source_roles():
+    body = "该约定仅适用于已选择的责任。"
+    content = wrapped("另一项责任的完整给付规则。") + (
+        f"\n【同文件引用原文：structural-parent；Unicode码点100:130】\n{body}\n【引用原文结束】"
+    )
+    context = parse_source_context(
+        native_prompt(
+            [
+                {"reference_id": "1", "content": wrapped(body)},
+                {"reference_id": "1", "content": content},
+            ]
+        )
+    )
+    copies = [unit for unit in context.units if unit.text == body]
+    assert [unit.role for unit in copies] == ["primary", "structural-parent"]
+    other = next(unit for unit in context.units if unit.text.startswith("另一项"))
+    assert other.required_unit_ids == (copies[1].identifier,)
+
+
+def test_identical_body_with_same_parent_at_different_native_locations_is_separate():
+    body, parent = "分别适用的完整原文。", "同一上级原文条件。"
+    tail = f"\n【同文件引用原文：structural-parent；Unicode码点10:30】\n{parent}\n【引用原文结束】"
+    contents = [
+        wrapped(body).replace(
+            "【主原文开始】",
+            f"原文件Unicode码点（左闭右开）：{start}:{start + len(body)}\n【主原文开始】",
+        )
+        + tail
+        for start in (100, 300)
+    ]
+    context = parse_source_context(
+        native_prompt([{"reference_id": "1", "content": value} for value in contents])
+    )
+    benefits = [unit for unit in context.units if unit.role == "primary"]
+    parents = [unit for unit in context.units if unit.role == "structural-parent"]
+    assert len(benefits) == 2
+    assert [unit.chunk_index for unit in benefits] == [0, 1]
+    assert len(parents) == 1
+    assert all(unit.required_unit_ids == (parents[0].identifier,) for unit in benefits)
+
+
+def test_same_text_at_unknown_origin_does_not_merge_across_file_references():
+    context = parse_source_context(
+        native_prompt(
+            [
+                {"reference_id": reference, "content": "完整的原文约定。"}
+                for reference in ("1", "2", "1")
+            ],
+            references={"1": "甲条款.pdf", "2": "乙条款.pdf"},
+        )
+    )
+    assert [(unit.reference_id, unit.chunk_index) for unit in context.units] == [
+        ("1", 0),
+        ("2", 1),
+    ]
+
+
+def test_known_origin_copy_deduplicates_across_different_native_chunks():
+    parent = "两项责任均受本条完整条件约束。"
+    tail = f"\n【同文件引用原文：structural-parent；Unicode码点100:140】\n{parent}\n【引用原文结束】"
+    context = parse_source_context(
+        native_prompt(
+            [
+                {"reference_id": "1", "content": wrapped(body) + tail}
+                for body in ("甲责任的完整约定。", "乙责任的完整约定。")
+            ]
+        )
+    )
+    parents = [unit for unit in context.units if unit.role == "structural-parent"]
+    assert len(parents) == 1
+    assert parents[0].original_source_span == (100, 140)
+    assert all(
+        unit.required_unit_ids == (parents[0].identifier,)
+        for unit in context.units
+        if unit.role == "primary"
+    )
+
+
 def test_duplicate_selected_units_and_missing_supported_evidence_fail():
     context = parse_source_context(
         native_prompt([{"reference_id": "1", "content": "原文。"}])
