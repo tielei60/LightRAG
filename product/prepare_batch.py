@@ -99,8 +99,9 @@ def text_structure_spans(source: str, role: str = "underwriting") -> list[Span]:
             for match in re.finditer(r"(?m)^(#{1,3})[ \t]+[^\n]+$", source)
         ]
         return _headings_to_spans(source, headings)
+    plan_heading = re.compile(r"(?:保障)?计划[一二三四五六七八九十百0-9]+[：:]?")
     pattern = re.compile(
-        r"(?m)^[ \t]*(?:[一二三四五六七八九十]+、[^\n]+|[（(][一二三四五六七八九十]+[）)][ \t]*[^\n]+|[1-9]\d?\.[ \t]*(?:基本责任|可选责任[一二三四五]?)[ \t]*|【[^\n】]+】[ \t]*)$"
+        r"(?m)^[ \t]*(?:[一二三四五六七八九十]+、[^\n]+|[（(][一二三四五六七八九十]+[）)][ \t]*[^\n]+|[1-9]\d?\.[ \t]*(?:基本责任|可选责任[一二三四五]?)[ \t]*|(?:保障)?计划[一二三四五六七八九十百0-9]+[：:]?[ \t]*|【[^\n】]+】[ \t]*)$"
     )
     matches = list(pattern.finditer(source))
     # The limited/unlimited coverage range blocks are one shared introductory
@@ -121,9 +122,13 @@ def text_structure_spans(source: str, role: str = "underwriting") -> list[Span]:
     for match in matches:
         heading = match.group().strip()
         if heading.startswith("【"):
-            level, kind = 4, "responsibility"
+            level, kind = 5, "responsibility"
+        elif plan_heading.fullmatch(heading):
+            # A plan is a scope parent, not part of the preceding benefit body.
+            # Its basic/optional groups and repeated benefit names stay local.
+            level, kind = 3, "coverage-plan"
         elif re.match(r"[1-9]", heading):
-            level, kind = 3, "responsibility-group"
+            level, kind = 4, "responsibility-group"
         elif heading.startswith(("（", "(")):
             level, kind = 2, "document-section"
         else:
@@ -171,17 +176,22 @@ def _shared_responsibility_rules(source: str, spans: list[Span]) -> list[Span]:
     for siblings in families.values():
         if len(siblings) < 2:
             continue
-        names = [
+        names = {
             re.sub(r"[\s【】]", "", spans[index].responsibility_heading or "")
             for index in siblings
-        ]
+        } - {""}
+        if len(names) < 2:
+            continue
         last = spans[siblings[-1]]
         shared = []
         for sentence in re.finditer(
             r"[^。！？]+[。！？]?", source[last.start : last.end]
         ):
             text = re.sub(r"\s+", "", sentence.group())
-            if sum(bool(name) and name in text for name in names) >= 2:
+            # Mentioning another benefit (for example, deducting its payouts)
+            # does not make the current benefit's terms common to both.
+            joint_rule = re.search(r"之和|合计|共享|共用|二者|两项保险责任|均", text)
+            if joint_rule and sum(name in text for name in names) >= 2:
                 shared.append(last.start + sentence.start())
         if shared:
             reference = (min(shared), last.end, "shared-sibling-rule")
@@ -702,7 +712,7 @@ def build_batch(
         "tokenizer": "o200k_base (gpt-4o-mini)",
         "unit_token_limit": token_limit,
         "target_tokens": target_tokens,
-        "segmentation_revision": "source-semantic-v4",
+        "segmentation_revision": "source-semantic-v5",
         "target_tokens_policy": "retained for command compatibility; source business boundaries take precedence and are never split to meet a size target",
     }
     save_json(output / "manifest.json", manifest)

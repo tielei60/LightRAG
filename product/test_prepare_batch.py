@@ -246,6 +246,89 @@ class PreparationTests(unittest.TestCase):
         refund = [chunk for chunk, _ in rows if "尚未支付时，不退现金价值" in chunk]
         self.assertEqual(len(refund), 1)
 
+    def test_disclosure_plan_heading_limits_parent_and_shared_rule_scope(self):
+        text = (
+            "测试医疗保险产品说明书\n一、产品基本特征\n（一）保险责任\n"
+            "本合同含两个保障计划，按保险单所载计划承担相应保险责任。\n"
+            "保障计划一：\n在本合同保险期间内，按下列约定承担责任。\n"
+            "【生存保险金】\n每个保单周年日生存，给付生存保险金。\n"
+            "【身故保险金】\n若身故，本合同终止，向身故保险金受益人给付"
+            "累计所交保险费扣除累计已给付生存保险金后的余额。\n"
+            "保障计划二：\n在本合同保险期间内，按下列约定承担责任。\n"
+            "【生存保险金】\n每个保单周年日生存，给付生存保险金。\n"
+            "（二）责任免除\n仅按合同约定处理。\n"
+        )
+        self.path.write_text(text)
+        payload, catalogs, report = prepare_document(
+            self.path, self.product, "disclosure", len
+        )
+        rows = [
+            (chunk, catalog)
+            for chunk, catalog in zip(
+                payload["text"].split(DELIMITER), catalogs, strict=True
+            )
+            if catalog["scope"]["unit_kind"] == "responsibility"
+        ]
+        self.assertEqual(len(rows), 3)
+        plan_two = rows[-1]
+        self.assertIn("保障计划二：", plan_two[1]["scope"]["heading_path"])
+        self.assertIn("保障计划二：", plan_two[0])
+        self.assertNotIn("保障计划一", plan_two[0])
+        self.assertNotIn("身故保险金", plan_two[0])
+        self.assertNotIn("扣除累计已给付", plan_two[0])
+        for chunk, catalog in rows[:2]:
+            self.assertIn("保障计划一：", catalog["scope"]["heading_path"])
+            self.assertNotIn("保障计划二", chunk)
+        self.assertNotIn("身故保险金", rows[0][0])
+        self.assertEqual(
+            "".join(text[row["start"] : row["end"]] for row in report["chunks"]), text
+        )
+
+    def test_repeated_responsibility_name_is_not_two_distinct_shared_targets(self):
+        text = (
+            "测试医疗保险产品说明书\n一、产品基本特征\n（一）保险责任\n"
+            "【生存保险金】\n按第一种安排给付。\n"
+            "【生存保险金】\n本段生存保险金仅适用于第二种安排。\n"
+            "（二）责任免除\n按合同约定处理。\n"
+        )
+        self.path.write_text(text)
+        payload, catalogs, _ = prepare_document(
+            self.path, self.product, "disclosure", len
+        )
+        first = next(
+            chunk
+            for chunk, catalog in zip(
+                payload["text"].split(DELIMITER), catalogs, strict=True
+            )
+            if catalog["scope"]["unit_kind"] == "responsibility"
+        )
+        self.assertNotIn("仅适用于第二种安排", first)
+
+    def test_plan_parent_can_contain_basic_and_optional_responsibility_groups(self):
+        text = (
+            "测试医疗保险产品说明书\n一、产品基本特征\n（一）保险责任\n"
+            "按所选保障计划承担责任。\n保障计划1：\n仅本计划适用。\n"
+            "1.基本责任\n【甲保险金】\n符合甲条件给付。\n"
+            "2.可选责任\n【乙保险金】\n符合乙条件给付。\n"
+            "保障计划2：\n仅另一计划适用。\n"
+            "【丙保险金】\n符合丙条件给付。\n"
+        )
+        self.path.write_text(text)
+        payload, catalogs, _ = prepare_document(
+            self.path, self.product, "disclosure", len
+        )
+        optional = next(
+            (chunk, catalog)
+            for chunk, catalog in zip(
+                payload["text"].split(DELIMITER), catalogs, strict=True
+            )
+            if catalog["scope"]["responsibility_heading"] == "【乙保险金】"
+        )
+        self.assertIn("保障计划1：", optional[1]["scope"]["heading_path"])
+        self.assertIn("2.可选责任", optional[1]["scope"]["heading_path"])
+        self.assertIn("仅本计划适用", optional[0])
+        self.assertNotIn("仅另一计划适用", optional[0])
+
     def test_definitions_are_separate_complete_units_not_token_packed(self):
         _, catalogs, report = self.prepare()
         frames = [
