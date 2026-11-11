@@ -2,13 +2,16 @@ name: Product Evidence Offline Contracts
 on:
   push:
     branches: ['codex/**', main, dev, 'dev-*']
-    paths: ['product/**', 'tests/product/**', 'docs/InsuranceEvidenceOptimization-zh.md', '.github/workflows/product-evidence-tests.yml', 'uv.lock', 'pyproject.toml']
+    paths: ['product/**', 'tests/product/**', 'lightrag/**', 'docs/*Import*', 'docs/InsuranceEvidenceOptimization-zh.md', '.github/workflows/product-evidence-tests.yml', 'uv.lock', 'pyproject.toml']
   pull_request:
-    paths: ['product/**', 'tests/product/**', '.github/workflows/product-evidence-tests.yml', 'uv.lock', 'pyproject.toml']
+    paths: ['product/**', 'tests/product/**', 'lightrag/**', '.github/workflows/product-evidence-tests.yml', 'uv.lock', 'pyproject.toml']
   workflow_dispatch:
 jobs:
   product-contracts:
     runs-on: ubuntu-latest
+    env:
+      PYTHON_DOTENV_DISABLED: '1'
+      TIKTOKEN_CACHE_DIR: ${{ github.workspace }}/.cache/tiktoken
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
@@ -18,9 +21,11 @@ jobs:
         with:
           enable-cache: true
       - run: uv sync --frozen --extra api --extra pytest
+      - name: Prepare tokenizer cache without model calls
+        run: uv run --no-sync lightrag-download-cache --tiktoken --cache-dir .cache/tiktoken
       - name: Run existing and external product contracts without provider calls
-        run: uv run --no-sync pytest product/test_evidence_extract.py product/test_prepare_context.py product/test_manage.py tests/product/ -q
+        run: uv run --no-sync pytest product/test_*.py tests/product/ -q
       - name: Verify original sample positions without models
         run: uv run --no-sync python -m product.trial_examples.verify_examples
-      - name: Lint external experiment
-        run: uv run --no-sync ruff check product/evidence_trial.py product/trial_examples/verify_examples.py tests/product/
+      - name: Lint product import and evidence tools
+        run: uv run --no-sync ruff check product/ tests/product/
