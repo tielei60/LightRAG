@@ -1,0 +1,59 @@
+{
+  "extractor": "product.prepare_context.extract_source; pypdf 6.21.4",
+  "offset_unit": "Unicode code points, half-open [start, end), unmodified extracted text",
+  "extracted_text_sha256": "8384fc59f08f1bd0a00039a1a0b225f43cbcf6394dbe3ab3f97b8f8d137fdf63",
+  "units": {
+    "jkyh:terms:2.1": {
+      "span_text_sha256": "8e0d0255ccb12039df0ae20467ed7f94e7ebe44a8a19669cdcefdee909f4b15d",
+      "start_boundary": "2.1 基本保险金额 本合同",
+      "next_boundary": "2.2 免 赔 额 和 给 付\n比例\n本合同基本责任的免赔额和给付比例",
+      "physical_pages": [
+        2
+      ]
+    },
+    "jkyh:terms:2.3": {
+      "span_text_sha256": "c602da6fae425a04e808c40a7227e01444d7df65f3eee6943cabf11a82311361",
+      "start_boundary": "2.3 保险期间 本合同",
+      "next_boundary": "2.4 不保证续保 本产品保险期间为一年。保险期间届满，您需要重新向本",
+      "physical_pages": [
+        2
+      ]
+    },
+    "jkyh:terms:2.5-premise": {
+      "span_text_sha256": "9f24a1ab1b9120e5a0df6e52d81172d71d2512d46fc8bad5593754958bb248c7",
+      "start_boundary": "2.5 保险责任 本合同",
+      "next_boundary": "2.5.1 基本责任\n住院医疗保险\n金\n被保险人遭受意外伤害（见释义）",
+      "physical_pages": [
+        2
+      ]
+    },
+    "jkyh:terms:2.5.2": {
+      "span_text_sha256": "0f31c3e0fefae9e23eaf65539a20780d1c68c68a853d9fbc4a5c1b38f629a119",
+      "start_boundary": "2.5.2 可选责任\n",
+      "next_boundary": "2.6 责任免除 因下列情形之一，导致被保险人支出医疗费用或住院的，本",
+      "physical_pages": [
+        3
+      ]
+    },
+    "jkyh:terms:2.6": {
+      "span_text_sha256": "f5ccc2c1ac6a43879caed7e5273b88f7a42cb5fcf49229e48be53d5b7a0d091c",
+      "start_boundary": "2.6 责任免除 因下列",
+      "next_boundary": "3． 保险金的申请                          ",
+      "physical_pages": [
+        3,
+        4
+      ]
+    },
+    "jkyh:terms:definitions": {
+      "span_text_sha256": "1ca1e2094a1da1d84d74042d73da5454fb232859ee94f65a0cf9e140f37fdd8c",
+      "start_boundary": "7． 释义                                                                                   \n",
+      "next_boundary": "",
+      "physical_pages": [
+        7,
+        8,
+        9,
+        10
+      ]
+    }
+  }
+}

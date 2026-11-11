@@ -1,0 +1,11 @@
+{
+  "question": "只检查条款证据：选择可选责任时，2.5 的共同前提是否被一并保留？",
+  "product_ref": "placeholder:platform-product:jingkangyouhu",
+  "allowed_document_refs": [
+    "placeholder:platform-document:jingkangyouhu-terms"
+  ],
+  "scope": {},
+  "max_evidence_units": 30,
+  "max_depth": 8,
+  "max_context_chars": 24000
+}

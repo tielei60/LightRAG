@@ -1,0 +1,14 @@
+{
+  "status": "success",
+  "data": {
+    "chunks": [
+      {
+        "chunk_id": "synthetic-retrieved-paired",
+        "file_path": "synthetic_scope_fixture.txt",
+        "content": "SYNTHETIC PAIRED BRANCH\nToken ALPHA applies only to (plan=计划一, option=基础) OR (plan=计划二, option=附加). These are two exact tuples, never their Cartesian product.\n"
+      }
+    ],
+    "entities": [],
+    "relationships": []
+  }
+}

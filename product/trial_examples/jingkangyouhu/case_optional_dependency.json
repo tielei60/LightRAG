@@ -1,0 +1,11 @@
+{
+  "question": "只检查条款证据：住院津贴责任应同时提供哪些上级前提、限额和释义原文？不要据此判定个案赔付。",
+  "product_ref": "placeholder:platform-product:jingkangyouhu",
+  "allowed_document_refs": [
+    "placeholder:platform-document:jingkangyouhu-terms"
+  ],
+  "scope": {},
+  "max_evidence_units": 30,
+  "max_depth": 8,
+  "max_context_chars": 24000
+}

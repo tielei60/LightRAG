@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "source_root": "../../..",
+  "documents": [
+    {
+      "document_ref": "placeholder:platform-document:jingkangyouhu-terms",
+      "product_ref": "placeholder:platform-product:jingkangyouhu",
+      "file_path": "北京人寿京康优护医疗保险条款.pdf",
+      "source": "docs/insurance_docs/京康优护/北京人寿京康优护医疗保险条款.pdf",
+      "source_sha256": "144cff9c1e36b2358f6f077acc607d532577aaf8579fd730e09bc9d131f76515",
+      "units": [
+        {
+          "id": "jkyh:terms:2.1",
+          "start": 1911,
+          "end": 1977,
+          "title": "2.1 基本保险金额",
+          "anchors": [
+            "2.1 基本保险金额 本合同"
+          ],
+          "scope_status": "unreviewed",
+          "scope": [
+            {}
+          ],
+          "requires": []
+        },
+        {
+          "id": "jkyh:terms:2.3",
+          "start": 2081,
+          "end": 2154,
+          "title": "2.3 保险期间",
+          "anchors": [
+            "2.3 保险期间 本合同"
+          ],
+          "scope_status": "unreviewed",
+          "scope": [
+            {}
+          ],
+          "requires": []
+        },
+        {
+          "id": "jkyh:terms:2.5-premise",
+          "start": 2224,
+          "end": 2341,
+          "title": "2.5 保险责任",
+          "anchors": [
+            "2.5 保险责任 本合同"
+          ],
+          "scope_status": "unreviewed",
+          "scope": [
+            {}
+          ],
+          "requires": [
+            "jkyh:terms:definitions"
+          ]
+        },
+        {
+          "id": "jkyh:terms:2.5.2",
+          "start": 3424,
+          "end": 3633,
+          "title": "2.5.2 可选责任",
+          "anchors": [
+            "2.5.2 可选责任\n"
+          ],
+          "scope_status": "unreviewed",
+          "scope": [
+            {}
+          ],
+          "requires": [
+            "jkyh:terms:2.5-premise",
+            "jkyh:terms:2.1",
+            "jkyh:terms:2.3",
+            "jkyh:terms:2.6",
+            "jkyh:terms:definitions"
+          ]
+        },
+        {
+          "id": "jkyh:terms:2.6",
+          "start": 3633,
+          "end": 4636,
+          "title": "2.6 责任免除",
+          "anchors": [
+            "2.6 责任免除 因下列"
+          ],
+          "scope_status": "unreviewed",
+          "scope": [
+            {}
+          ],
+          "requires": [
+            "jkyh:terms:definitions"
+          ]
+        },
+        {
+          "id": "jkyh:terms:definitions",
+          "start": 8728,
+          "end": 11848,
+          "title": "7． 释义",
+          "anchors": [
+            "7． 释义                                                                                   \n"
+          ],
+          "scope_status": "unreviewed",
+          "scope": [
+            {}
+          ],
+          "requires": []
+        }
+      ]
+    }
+  ]
+}

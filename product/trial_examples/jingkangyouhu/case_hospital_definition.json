@@ -1,0 +1,11 @@
+{
+  "question": "只检查条款证据：住院津贴责任提及的医院与住院定义能否追溯到原文？",
+  "product_ref": "placeholder:platform-product:jingkangyouhu",
+  "allowed_document_refs": [
+    "placeholder:platform-document:jingkangyouhu-terms"
+  ],
+  "scope": {},
+  "max_evidence_units": 30,
+  "max_depth": 8,
+  "max_context_chars": 24000
+}

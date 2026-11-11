@@ -145,3 +145,9 @@ make -f product/Makefile BATCH=jingkangyouhu-pointer-scoped evidence-import
 已有目标或上传回执时拒绝再次导入。原型记录在该批忽略目录的`evidence-events.jsonl`、`provider-calls.jsonl`、`contract.json`、`uploads.json`、`technical-verification.json`及`final-code-readback.json`。SDK完成后关闭存储再交接，既有原件和其他工作区保留。
 
 该入口目前验证四类摘录，不是整款资料；实际完成事实由对应OpenSpec tasks记录。SDK使用原生`ainsert`与`aquery`，当前HTTP上传服务尚未接入适配器，不能把普通`start/import`当成证据指针导入。真实试查沿用已授权问题，仅生成检索上下文；问答生成另行核输入完整性。角色为抽取/关键词flash、问答max，抽取不回退max。
+
+## 外置证据对照实验（独立入口）
+
+本次新增 `python -m product.evidence_trial prepare/replay/live`，用于在不修改 LightRAG 核心的前提下，对同次原生检索结果做文档范围校验、原文证据补齐与一次生成对照。它不替代原生 `/query`、WebUI 或已有证据指针导入，也不新增平台产品主数据。
+
+先按 [外置实验操作说明](trial_examples/RUN-zh.md) 跑无密钥离线样例，再在本地审核资料范围并显式配置模型。完整设计、已实现范围和未实施项见 [保险产品优化方案](../docs/InsuranceEvidenceOptimization-zh.md)。真实原件样例默认未审，不把定位测试当成业务准确率。每次实验保存完整问题、检索结果、证据、提示、答案及异常；原生API未暴露的阶段明确标为不可取得。

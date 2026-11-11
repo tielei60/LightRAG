@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "source_root": ".",
+  "documents": [
+    {
+      "document_ref": "placeholder:platform-document:synthetic",
+      "product_ref": "placeholder:platform-product:synthetic",
+      "file_path": "synthetic_scope_fixture.txt",
+      "source": "synthetic_scope_fixture.txt",
+      "source_sha256": "890424ac26a7dfda0f0e0c02530b20874e8148f8a01bec54470305c21ef76d7b",
+      "units": [
+        {
+          "id": "synthetic:common",
+          "start": 0,
+          "end": 158,
+          "title": "SYNTHETIC COMMON PREMISE",
+          "anchors": [
+            "SYNTHETIC COMMON PREMISE"
+          ],
+          "scope_status": "reviewed",
+          "scope": [
+            {}
+          ],
+          "requires": []
+        },
+        {
+          "id": "synthetic:paired",
+          "start": 158,
+          "end": 317,
+          "title": "SYNTHETIC PAIRED BRANCH",
+          "anchors": [
+            "SYNTHETIC PAIRED BRANCH"
+          ],
+          "scope_status": "reviewed",
+          "scope": [
+            {
+              "plan": "计划一",
+              "option": "基础"
+            },
+            {
+              "plan": "计划二",
+              "option": "附加"
+            }
+          ],
+          "requires": [
+            "synthetic:common"
+          ]
+        }
+      ]
+    }
+  ]
+}

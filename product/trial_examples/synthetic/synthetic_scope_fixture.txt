@@ -1,0 +1,4 @@
+SYNTHETIC COMMON PREMISE
+This is a software fixture, NOT an insurance product or insurance advice. Token ALPHA is usable only when the paired branch applies.
+SYNTHETIC PAIRED BRANCH
+Token ALPHA applies only to (plan=计划一, option=基础) OR (plan=计划二, option=附加). These are two exact tuples, never their Cartesian product.

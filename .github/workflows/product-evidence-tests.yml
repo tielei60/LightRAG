@@ -1,0 +1,26 @@
+name: Product Evidence Offline Contracts
+on:
+  push:
+    branches: ['codex/**', main, dev, 'dev-*']
+    paths: ['product/**', 'tests/product/**', 'docs/InsuranceEvidenceOptimization-zh.md', '.github/workflows/product-evidence-tests.yml', 'uv.lock', 'pyproject.toml']
+  pull_request:
+    paths: ['product/**', 'tests/product/**', '.github/workflows/product-evidence-tests.yml', 'uv.lock', 'pyproject.toml']
+  workflow_dispatch:
+jobs:
+  product-contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+      - run: uv sync --frozen --extra api --extra pytest
+      - name: Run existing and external product contracts without provider calls
+        run: uv run --no-sync pytest product/test_evidence_extract.py product/test_prepare_context.py product/test_manage.py tests/product/ -q
+      - name: Verify original sample positions without models
+        run: uv run --no-sync python -m product.trial_examples.verify_examples
+      - name: Lint external experiment
+        run: uv run --no-sync ruff check product/evidence_trial.py product/trial_examples/verify_examples.py tests/product/

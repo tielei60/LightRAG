@@ -1,0 +1,15 @@
+{
+  "question": "Which source spans support token ALPHA for this exact synthetic tuple?",
+  "product_ref": "placeholder:platform-product:synthetic",
+  "allowed_document_refs": [
+    "placeholder:platform-document:synthetic"
+  ],
+  "scope": {
+    "plan": "计划一",
+    "option": "附加"
+  },
+  "max_evidence_units": 30,
+  "max_depth": 8,
+  "max_context_chars": 24000,
+  "expected_evidence_ids": []
+}

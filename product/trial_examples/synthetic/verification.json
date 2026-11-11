@@ -1,0 +1,19 @@
+{
+  "extractor": "product.prepare_context.extract_source; pypdf 6.21.4",
+  "offset_unit": "Unicode code points, half-open [start, end), unmodified extracted text",
+  "extracted_text_sha256": "890424ac26a7dfda0f0e0c02530b20874e8148f8a01bec54470305c21ef76d7b",
+  "units": {
+    "synthetic:common": {
+      "span_text_sha256": "dc154e6836f2df9a37e2f33b737bdde45d77be54aa05a7dcb24c1bfe230a27c6",
+      "start_boundary": "SYNTHETIC COMMON PREMISE",
+      "next_boundary": "SYNTHETIC PAIRED BRANCH\nToken ALPHA",
+      "physical_pages": []
+    },
+    "synthetic:paired": {
+      "span_text_sha256": "6ae2aa71fefa93d79eb2c38240e72ed9c374170a688992d0d61ac0b50211de2b",
+      "start_boundary": "SYNTHETIC PAIRED BRANCH",
+      "next_boundary": "",
+      "physical_pages": []
+    }
+  }
+}
