@@ -1,4 +1,4 @@
-"""Preview/apply a reviewed evidence-pointer prototype through the native SDK."""
+"""Preflight evidence selections, then replay them through the native SDK."""
 
 from __future__ import annotations
 
@@ -8,6 +8,7 @@ import hashlib
 import json
 import os
 import time
+from collections import Counter
 from pathlib import Path
 from typing import Any
 
@@ -30,21 +31,292 @@ def checked_local(path: str, expected_hash: str) -> Path:
     return target
 
 
-async def apply_batch(apply: bool) -> None:
+def digest(value: str) -> str:
+    return hashlib.sha256(value.encode()).hexdigest()
+
+
+async def approve_extractions(adapter, requests: dict, concurrency: int) -> dict:
+    """Validate every exact native request before allowing any storage mutation."""
+    semaphore = asyncio.Semaphore(max(1, concurrency))
+    approved = {}
+
+    async def approve(prompt, chunk):
+        async with semaphore:
+            # Protocol/semantic validation gets one bounded local correction.
+            # Provider technical retries remain the provider's responsibility.
+            for attempt in range(2):
+                try:
+                    response = await adapter(
+                        prompt, system_prompt=adapter.native_system_prompt
+                    )
+                    native = json.loads(response)
+                    break
+                except ValueError:
+                    if attempt:
+                        raise
+            approved[digest(prompt)] = {
+                "source": chunk.source,
+                "content_sha256": digest(chunk.content),
+                "prompt_sha256": digest(prompt),
+                "native": native,
+            }
+
+    await asyncio.gather(
+        *(approve(prompt, chunk) for prompt, chunk in requests.items())
+    )
+    return approved
+
+
+def reuse_approved_selections(adapter, requests: dict, previous: Path) -> dict:
+    """Revalidate old pointers against exact current source and evidence catalogs."""
+    from product.evidence_extract import PointerResult, to_native
+
+    previous = previous.resolve(strict=True)
+    manifest = json.loads((previous / "manifest.json").read_text())
+    approved = json.loads((previous / "approved-extractions.json").read_text())[
+        "chunks"
+    ]
+    rows = json.loads((previous / "evidence-ledger.json").read_text())["selections"]
+    source_root = Path(manifest["source_root"]).resolve(strict=True)
+    catalogs = {}
+
+    def artifact(name, expected):
+        path = (previous / name).resolve(strict=True)
+        if (
+            not path.is_relative_to(previous)
+            or hashlib.sha256(path.read_bytes()).hexdigest() != expected
+        ):
+            raise ValueError("Prior reviewed artifact changed or escapes its batch")
+        return json.loads(path.read_text())
+
+    for entry in manifest["documents"]:
+        source = (source_root / entry["relative_path"]).resolve(strict=True)
+        if (
+            not source.is_relative_to(source_root)
+            or hashlib.sha256(source.read_bytes()).hexdigest() != entry["sha256"]
+        ):
+            raise ValueError("Prior approved source changed")
+        payload = artifact(entry["prepared_path"], entry["prepared_sha256"])
+        catalog = artifact(entry["catalog_path"], entry["catalog_sha256"])
+        content = payload["text"].split(
+            payload["chunking"]["params"]["split_by_character"]
+        )
+        if len(content) != len(catalog):
+            raise ValueError("Prior approved catalog count changed")
+        for text, item in zip(content, catalog, strict=True):
+            if digest(text) != item["content_sha256"]:
+                raise ValueError("Prior prepared chunk no longer matches catalog")
+            key = (source.name, item["content_sha256"])
+            if key in catalogs:
+                raise ValueError("Prior approved chunk identity is ambiguous")
+            catalogs[key] = (entry["product"], item["units"])
+
+    checked = []
+    for prompt, chunk in requests.items():
+        key = digest(prompt)
+        old = approved.get(key)
+        if (
+            old is None
+            or old["prompt_sha256"] != key
+            or old["content_sha256"] != digest(chunk.content)
+            or old["source"] != chunk.source
+        ):
+            raise ValueError(
+                "Prior approval does not match the exact current native input"
+            )
+        product, units = catalogs.get(
+            (chunk.source, digest(chunk.content)), (None, None)
+        )
+        current_units = [
+            {
+                "id": unit.identifier,
+                "start": unit.start,
+                "end": unit.end,
+                "entity_types": list(unit.entity_types),
+                "role": unit.role,
+            }
+            for unit in chunk.units
+        ]
+        old_units = [
+            {
+                "id": unit["id"],
+                "start": unit["start"],
+                "end": unit["end"],
+                "entity_types": unit.get("entity_types", []),
+                "role": unit.get("role", "primary"),
+            }
+            for unit in units or []
+        ]
+        if product != chunk.product or old_units != current_units or key not in rows:
+            raise ValueError(
+                "Prior pointers do not match the current source/unit identities"
+            )
+        selection = PointerResult.model_validate(rows[key]["selection"])
+        # Old native output and contract hashes confer no authority here.
+        # The current adapter must validate and regenerate every native record.
+        native = to_native(selection, chunk, profile=adapter.profile)
+        checked.append((key, selection, native))
+    if len(checked) != len(rows) or len(checked) != len(approved):
+        raise ValueError("Prior approval scope differs from current batch")
+    for key, selection, native in checked:
+        adapter.persist_selection(key, selection, native)
+    return {
+        "source_batch": previous.name,
+        "revalidated_chunks": len(checked),
+        "provider_called": False,
+        "method": "exact prompt/content/source/unit checks; current pointer validation and native regeneration",
+    }
+
+
+def validate_native_identities(approved: dict) -> None:
+    """Refuse lossy identifier normalization or truncation before native writes."""
+    from lightrag.constants import DEFAULT_ENTITY_NAME_MAX_LENGTH
+    from lightrag.utils import normalize_entity_name
+
+    seen = {}
+    for item in approved.values():
+        for entity in item["native"]["entities"]:
+            name = entity["name"]
+            normalized = normalize_entity_name(name)
+            if not normalized or len(normalized) > DEFAULT_ENTITY_NAME_MAX_LENGTH:
+                raise ValueError("Entity identifier would be empty or truncated")
+            if normalized in seen and seen[normalized] != name:
+                raise ValueError(
+                    "Entity identifiers collide after native normalization"
+                )
+            seen[normalized] = name
+
+
+def readback_files(target: Path, documents: list, approved: dict) -> dict:
+    """Read the closed file-backed batch and verify persisted native evidence."""
+    import networkx as nx
+
+    from lightrag.utils import (
+        normalize_entity_name,
+        sanitize_and_normalize_extracted_text,
+    )
+    from lightrag.utils_pipeline import normalize_document_file_path
+    from product.evidence_extract import canonical
+
+    def normalized(text):
+        return canonical(sanitize_and_normalize_extracted_text(text))
+
+    def preserves_evidence(expected, stored):
+        # Source-position merge ordering can differ from catalog order.
+        # Verify complete original paragraphs independently; never reduce
+        # this to a word/token presence check that could lose conditions.
+        paragraphs = [
+            normalized(part) for part in expected.split("\n\n") if part.strip()
+        ]
+        actual = normalized(stored)
+        return bool(paragraphs) and all(part in actual for part in paragraphs)
+
+    statuses = json.loads((target / "kv_store_doc_status.json").read_text())
+    chunks = json.loads((target / "kv_store_text_chunks.json").read_text())
+    graph = nx.read_graphml(target / "graph_chunk_entity_relation.graphml")
+    vectors = {
+        name: json.loads((target / f"vdb_{name}.json").read_text())
+        for name in ("entities", "relationships", "chunks")
+    }
+    errors = []
+    native_labels = [
+        normalize_document_file_path(entry["ingestion_label"]) for entry, _ in documents
+    ]
+    expected_labels = set(native_labels)
+    actual_labels = {row["file_path"] for row in statuses.values()}
+    if len(expected_labels) != len(native_labels):
+        errors.append("Manifest sources collide after native basename normalization")
+    if len(statuses) != len(documents) or actual_labels != expected_labels:
+        errors.append("Persisted document identities/count differ from manifest")
+    if any(row["status"] != "processed" for row in statuses.values()):
+        errors.append("One or more persisted documents are not processed")
+    expected_content = Counter(item["content_sha256"] for item in approved.values())
+    actual_content = Counter(digest(row["content"]) for row in chunks.values())
+    if actual_content != expected_content:
+        errors.append("Persisted chunk content differs from approved native input")
+    vector_rows = {name: data.get("data", []) for name, data in vectors.items()}
+    chunk_vector_ids = {row["__id__"] for row in vector_rows["chunks"]}
+    if chunk_vector_ids != set(chunks):
+        errors.append("Chunk vectors do not cover exactly persisted text chunks")
+    entity_vectors = {row["entity_name"]: row for row in vector_rows["entities"]}
+    relation_vectors = {
+        frozenset((row["src_id"], row["tgt_id"])): row
+        for row in vector_rows["relationships"]
+    }
+    for item in approved.values():
+        native = item["native"]
+        for entity in native["entities"]:
+            name = normalize_entity_name(entity["name"])
+            node = graph.nodes.get(name)
+            if node is None:
+                errors.append(f"Missing graph entity: {name}")
+                continue
+            description = entity["description"]
+            if not preserves_evidence(description, node["description"]):
+                errors.append(f"Graph entity lost approved evidence: {name}")
+            if name not in entity_vectors or not preserves_evidence(
+                description, entity_vectors[name]["content"]
+            ):
+                errors.append(f"Entity vector lost approved evidence: {name}")
+        for relation in native["relationships"]:
+            source, destination = (
+                normalize_entity_name(relation[k]) for k in ("source", "target")
+            )
+            edge = graph.get_edge_data(source, destination)
+            if edge is None:
+                errors.append(f"Missing graph relation: {source} / {destination}")
+                continue
+            description = relation["description"]
+            if not preserves_evidence(description, edge["description"]):
+                errors.append(
+                    f"Graph relation lost approved evidence: {source} / {destination}"
+                )
+            vector = relation_vectors.get(frozenset((source, destination)))
+            if vector is None or not preserves_evidence(description, vector["content"]):
+                errors.append(
+                    f"Relation vector lost approved evidence: {source} / {destination}"
+                )
+    for name, row in [
+        *graph.nodes(data=True),
+        *[(f"{u} / {v}", r) for u, v, r in graph.edges(data=True)],
+    ]:
+        source_ids = set(row.get("source_id", "").split("<SEP>"))
+        if not source_ids or not source_ids <= chunks.keys():
+            errors.append(f"Missing or unresolved graph chunk provenance: {name}")
+    return {
+        "workspace": target.name,
+        "readback": "closed native files; fresh JSON, GraphML and vector reads",
+        "documents": len(statuses),
+        "processed_documents": sum(
+            row["status"] == "processed" for row in statuses.values()
+        ),
+        "chunks": len(chunks),
+        "entities": graph.number_of_nodes(),
+        "relationships": graph.number_of_edges(),
+        "vectors": {name: len(rows) for name, rows in vector_rows.items()},
+        "errors": errors,
+        "technical_passed": not errors,
+        "business_acceptance": "pending native retrieval and answer review",
+    }
+
+
+async def apply_batch(apply: bool, approved_from: str | None = None) -> None:
     files = manage.checked_files()
     config = manage.settings()
     manifest = json.loads(manage.MANIFEST.read_text())
     if manifest["workspace"] != config["WORKSPACE"]:
         raise ValueError("Workspace does not match manifest")
-    if config["EXTRACT_LLM_MODEL"] != "qwen3.8-flash" or config["MAX_GLEANING"] != "0":
-        raise ValueError("Evidence prototype requires Flash initial extraction only")
+    if config["MAX_GLEANING"] != "0":
+        raise ValueError(
+            "Evidence replay requires initial extraction only (MAX_GLEANING=0)"
+        )
     if Path(config["WORKING_DIR"]).resolve() != manage.ROOT / "rag_storage":
         raise ValueError("Unexpected native storage root")
     os.environ.update({k: v for k, v in config.items() if v is not None})
 
     import yaml
 
-    from lightrag import LightRAG, QueryParam
+    from lightrag import LightRAG
     from lightrag.base import DocStatus
     from lightrag.llm.openai import openai_complete_if_cache, openai_embed
     from lightrag.llm_roles import RoleLLMConfig
@@ -55,12 +327,14 @@ async def apply_batch(apply: bool) -> None:
     )
     from lightrag.utils import EmbeddingFunc
     from product.evidence_extract import EvidenceChunk, EvidenceExtractor, EvidenceUnit
+    from product.extraction_profile import ExtractionProfile
     from product.prepare_context import extract_source
 
     profile_path = (
         Path(config["PROMPT_DIR"]) / "entity_type" / config["ENTITY_TYPE_PROMPT_FILE"]
     )
     profile_file = yaml.safe_load(profile_path.read_text())
+    extraction_profile = ExtractionProfile.from_mapping(profile_file)
     profile = validate_entity_extraction_prompt_profile_for_mode(
         resolve_entity_extraction_prompt_profile(
             {"entity_type_prompt_file": config["ENTITY_TYPE_PROMPT_FILE"]}, True
@@ -100,10 +374,12 @@ async def apply_batch(apply: bool) -> None:
                     unit["end"],
                     source,
                     tuple(unit.get("entity_types", [])),
+                    role=unit.get("role", "primary"),
                 )
                 for unit in item["units"]
             )
             chunk = EvidenceChunk(source_path.name, entry["product"], content, units)
+            extraction_profile.validate_catalog(chunk.units)
             prompt = (
                 PROMPTS["entity_extraction_json_user_prompt"]
                 .format(**context, input_text=content, heading_context_block="")
@@ -128,15 +404,41 @@ async def apply_batch(apply: bool) -> None:
     if not apply:
         return
     target = manage.ROOT / "rag_storage" / config["WORKSPACE"]
+    if manage.PID_FILE.exists():
+        try:
+            os.kill(int(manage.PID_FILE.read_text()), 0)
+        except ProcessLookupError:
+            pass
+        else:
+            raise ValueError("Stop the batch server before the SDK writer starts")
     if target.exists() or manage.RECEIPTS.exists():
         raise ValueError("Target or receipt exists; inspect it instead of replaying")
-    contract_hash = hashlib.sha256(
-        (
-            profile_path.read_text()
-            + "".join(catalog_hashes)
-            + Path(__file__).with_name("evidence_extract.py").read_text()
-        ).encode()
-    ).hexdigest()
+    contract_hash = digest(
+        json.dumps(
+            {
+                "profile": profile_path.read_text(),
+                "catalogs": catalog_hashes,
+                "adapter": Path(__file__).with_name("evidence_extract.py").read_text(),
+                "manifest": manifest,
+                "models": {
+                    key: value
+                    for key, value in config.items()
+                    if any(
+                        part in key
+                        for part in (
+                            "MODEL",
+                            "EXTRA_BODY",
+                            "EMBEDDING_DIM",
+                            "BINDING_HOST",
+                        )
+                    )
+                },
+                "native_system": native_system,
+            },
+            ensure_ascii=False,
+            sort_keys=True,
+        )
+    )
 
     def role_function(role: str):
         model = config[f"{role.upper()}_LLM_MODEL"]
@@ -201,17 +503,46 @@ async def apply_batch(apply: bool) -> None:
             response_format={"type": "json_object"},
         )
 
-    adapter = EvidenceExtractor(
-        requests=requests,
-        native_system_prompt=native_system,
-        native_summary_template=PROMPTS["summarize_entity_descriptions"],
-        type_guidance=profile["entity_types_guidance"],
-        selection_guidance=profile_file["evidence_selection_guidance"],
-        complete=select_evidence,
-        record=lambda event: append_event(
+    adapter_options = {
+        "requests": requests,
+        "native_system_prompt": native_system,
+        "native_summary_template": PROMPTS["summarize_entity_descriptions"],
+        "type_guidance": profile["entity_types_guidance"],
+        "selection_guidance": profile_file["evidence_selection_guidance"],
+        "complete": select_evidence,
+        "record": lambda event: append_event(
             manage.OUTPUT / "evidence-events.jsonl", event
         ),
+        "ledger_path": manage.OUTPUT / "evidence-ledger.json",
+        "ledger_context": contract_hash,
+        "profile": extraction_profile,
+    }
+    approval_adapter = EvidenceExtractor(**adapter_options)
+    if approved_from is not None:
+        if not approved_from or any(
+            c not in "abcdefghijklmnopqrstuvwxyz0123456789_-" for c in approved_from
+        ):
+            raise ValueError("Invalid source approval batch")
+        previous = manage.ROOT / "output" / approved_from
+        if previous.resolve() == manage.OUTPUT.resolve():
+            raise ValueError("Approval reuse requires a distinct new candidate batch")
+        reused = reuse_approved_selections(approval_adapter, requests, previous)
+        manage.save_json(manage.OUTPUT / "approval-reuse.json", reused)
+    approved = await approve_extractions(
+        approval_adapter, requests, int(config["EXTRACT_MAX_ASYNC_LLM"])
     )
+    validate_native_identities(approved)
+    manage.save_json(
+        manage.OUTPUT / "approved-extractions.json",
+        {
+            "contract_sha256": contract_hash,
+            "state": "validated_before_native_writes",
+            "chunks": approved,
+            "semantic_acceptance": "requires source and native retrieval review",
+        },
+    )
+    # A fresh adapter keeps future documents out of the current merge ledger.
+    adapter = EvidenceExtractor(**adapter_options, replay_only=True)
 
     async def embed(texts, **kwargs):
         return await openai_embed.func(
@@ -264,8 +595,8 @@ async def apply_batch(apply: bool) -> None:
         entity_extract_max_entities=int(config["MAX_EXTRACTION_ENTITIES"]),
         entity_extract_max_records=int(config["MAX_EXTRACTION_RECORDS"]),
         force_llm_summary_on_merge=3,
-        summary_max_tokens=64,
-        summary_context_size=8192,
+        summary_max_tokens=int(config.get("SUMMARY_MAX_TOKENS", "1200")),
+        summary_context_size=int(config.get("SUMMARY_CONTEXT_SIZE", "8192")),
         max_parallel_insert=1,
     )
     manage.save_json(
@@ -274,13 +605,17 @@ async def apply_batch(apply: bool) -> None:
             "sha256": contract_hash,
             "workspace": config["WORKSPACE"],
             "model": config["EXTRACT_LLM_MODEL"],
-            "merge_validation": "native threshold 64 tokens forces merge-path checks on real prototype evidence",
+            "merge_validation": "position-based evidence replay; no provider call during merge",
+            "approved_chunks": len(approved),
+            "summary_max_tokens": rag.summary_max_tokens,
+            "summary_context_size": rag.summary_context_size,
         },
     )
     receipts = []
     try:
         await rag.initialize_storages()
         for entry, payload in documents:
+            adapter.activate_sources([Path(entry["relative_path"]).name])
             receipt = {
                 "file": entry["ingestion_label"],
                 "state": "sending",
@@ -311,34 +646,27 @@ async def apply_batch(apply: bool) -> None:
                 raise RuntimeError(
                     "Native document did not finish; inspect original status"
                 )
-        for case in manifest.get("retrieval_checks", []):
-            response = await rag.aquery(
-                case["question"],
-                param=QueryParam(
-                    mode="mix", only_need_prompt=True, enable_rerank=False
-                ),
-            )
-            manage.save_json(
-                manage.OUTPUT / f"context-{case['id']}.json",
-                {
-                    "question": case["question"],
-                    "mode": "mix",
-                    "only_need_prompt": True,
-                    "execution": "native SDK",
-                    "response": response,
-                },
-            )
+
     finally:
         await rag.finalize_storages()
+    report = readback_files(target, documents, approved)
+    manage.save_json(manage.OUTPUT / "final-code-readback.json", report)
+    manage.save_json(manage.OUTPUT / "final-document-status.json", receipts)
+    print(json.dumps(report, ensure_ascii=False), flush=True)
+    if not report["technical_passed"]:
+        raise RuntimeError("Native readback failed; inspect final-code-readback.json")
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--batch", required=True)
     parser.add_argument("--apply", action="store_true")
+    parser.add_argument(
+        "--approved-from", help="Revalidate pointer selections from an earlier batch"
+    )
     args = parser.parse_args()
     manage.select_batch(args.batch)
-    asyncio.run(apply_batch(args.apply))
+    asyncio.run(apply_batch(args.apply, args.approved_from))
 
 
 if __name__ == "__main__":

@@ -23,6 +23,7 @@ import uuid
 import uvicorn
 import pipmaster as pm
 from typing import Any
+from collections.abc import Callable
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
 from pathlib import Path
@@ -1431,7 +1432,19 @@ async def validation_exception_handler(
     )
 
 
-def create_app(args):
+def create_app(
+    args,
+    *,
+    role_llm_func_wrapper: Callable[[str, Callable], Callable] | None = None,
+):
+    """Build the native app, optionally wrapping raw role callbacks before queues.
+
+    The wrapper is applied once to each newly built provider callback, including
+    runtime role replacements. It must return a callable and must not wrap the
+    queue-managed functions stored on an existing LightRAG instance.
+    """
+    if role_llm_func_wrapper is not None and not callable(role_llm_func_wrapper):
+        raise TypeError("role_llm_func_wrapper must be callable")
     # Check frontend build first and get status. The two entries are checked
     # independently: an old build directory may carry only index.html, which
     # degrades /workspace alone (see check_workspace_frontend_build).
@@ -2445,10 +2458,19 @@ def create_app(args):
         "language": args.summary_language,
     }
 
+    def wrapped_role_llm_func(role: str, override_meta: dict | None = None):
+        raw_func = create_role_llm_func(role, override_meta)
+        if role_llm_func_wrapper is None:
+            return raw_func
+        wrapped_func = role_llm_func_wrapper(role, raw_func)
+        if not callable(wrapped_func):
+            raise TypeError(f"Role callback wrapper must return a callable: {role}")
+        return wrapped_func
+
     role_llm_configs = {
         spec.name: {
             **resolve_role_llm_settings(spec.name),
-            "func": create_role_llm_func(spec.name),
+            "func": wrapped_role_llm_func(spec.name),
             "kwargs": create_role_llm_model_kwargs(spec.name),
         }
         for spec in ROLES
@@ -2529,7 +2551,7 @@ def create_app(args):
 
     rag.register_role_llm_builder(
         lambda role, meta: (
-            create_role_llm_func(role, meta),
+            wrapped_role_llm_func(role, meta),
             create_role_llm_model_kwargs(role, meta),
         )
     )
@@ -3347,7 +3369,7 @@ def check_and_install_dependencies():
             print(f"{package} installed successfully")
 
 
-def main():
+def main(*, role_llm_func_wrapper=None):
     # On Windows, ProactorEventLoop (default since Python 3.8) has known
     # race conditions with uvicorn's socket binding that can cause the server
     # to report it's running while the port is never actually bound.
@@ -3392,7 +3414,7 @@ def main():
     # - Cleanup is handled by the lifespan context manager's finally block
 
     # Create application instance directly instead of using factory function
-    app = create_app(global_args)
+    app = create_app(global_args, role_llm_func_wrapper=role_llm_func_wrapper)
 
     # Start Uvicorn in single process mode. Do not pass root_path here;
     # the prefix lives only on FastAPI's app.root_path. See

@@ -1,8 +1,8 @@
 ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/..)
 PYTHON := $(ROOT)/.venv/bin/python
-BATCH ?= first3
+BATCH ?= two-products-v5
 
-.PHONY: start status stop preview import evidence-preview evidence-import
+.PHONY: start status stop preview import evidence-preview evidence-import verify qa
 start status stop:
 	@$(PYTHON) $(ROOT)/product/manage.py --batch $(BATCH) $@
 
@@ -17,3 +17,9 @@ evidence-preview:
 
 evidence-import:
 	@cd "$(ROOT)" && "$(PYTHON)" -m product.evidence_import --batch "$(BATCH)" --apply
+
+verify:
+	@cd "$(ROOT)" && "$(PYTHON)" -m product.verify_batch --batch "$(BATCH)" readback
+
+qa:
+	@cd "$(ROOT)" && "$(PYTHON)" -m product.verify_batch --batch "$(BATCH)" qa --repeat 3

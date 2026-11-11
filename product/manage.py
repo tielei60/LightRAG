@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import itertools
 import json
 import os
 import signal
@@ -48,7 +49,8 @@ def checked_files() -> list[tuple[Path, dict]]:
     documents = manifest["documents"]
     expected = manifest.get("expected_product_count", 3)
     if (
-        expected not in (1, 3)
+        type(expected) is not int
+        or expected not in (1, 2, 3)
         or len({entry["product"] for entry in documents}) != expected
     ):
         raise ValueError("Product scope does not match the selected manifest")
@@ -92,10 +94,17 @@ def start() -> None:
         ROOT / "output/server.log" if OUTPUT.name == "first3" else OUTPUT / "server.log"
     )
     environment = os.environ.copy()
-    environment.update({k: v for k, v in settings().items() if v is not None})
+    config = settings()
+    environment.update({k: v for k, v in config.items() if v is not None})
+    grounded = str(config.get("PRODUCT_GROUNDED_QUERY", "false")).lower() == "true"
+    command = (
+        [str(ROOT / ".venv/bin/python"), "-m", "product.server"]
+        if grounded
+        else [str(ROOT / ".venv/bin/lightrag-server")]
+    )
     with log_path.open("ab") as log:
         process = subprocess.Popen(
-            [str(ROOT / ".venv/bin/lightrag-server")],
+            command,
             cwd=ROOT,
             stdout=log,
             stderr=subprocess.STDOUT,
@@ -107,7 +116,7 @@ def start() -> None:
 
 
 def status() -> None:
-    with httpx.Client(base_url=base_url(), timeout=10) as client:
+    with httpx.Client(base_url=base_url(), timeout=10, trust_env=False) as client:
         response = client.get("/health")
         response.raise_for_status()
         data = response.json()
@@ -124,9 +133,13 @@ def stop() -> None:
 
     pid = int(PID_FILE.read_text())
     process = psutil.Process(pid)
-    if Path(process.cwd()).resolve() != ROOT or not any(
-        "lightrag-server" in item for item in process.cmdline()
-    ):
+    command = process.cmdline()
+    native_server = any(Path(item).name == "lightrag-server" for item in command)
+    product_server = any(
+        left == "-m" and right == "product.server"
+        for left, right in itertools.pairwise(command)
+    )
+    if Path(process.cwd()).resolve() != ROOT or not (native_server or product_server):
         raise RuntimeError("Recorded PID is not this repository's LightRAG server")
     os.kill(pid, signal.SIGTERM)
     print(f"Requested graceful stop for PID {pid}")
@@ -158,7 +171,7 @@ def import_batch(apply: bool) -> None:
             "An upload receipt already exists; inspect original results instead of replaying"
         )
     receipts: list[dict] = []
-    with httpx.Client(base_url=base_url(), timeout=120) as client:
+    with httpx.Client(base_url=base_url(), timeout=120, trust_env=False) as client:
         health = client.get("/health")
         health.raise_for_status()
         data = health.json()
