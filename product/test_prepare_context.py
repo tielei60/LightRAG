@@ -54,6 +54,33 @@ class ContextTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 prepare(self.path, "Fixture Product", sections)
 
+    def test_verified_parent_context_preserves_separate_child_scope(self):
+        parent_start = self.text.index("1.1")
+        parent_end = self.text.index("\n条件甲")
+        self.sections[1].update(
+            parent_spans=[
+                {"start": parent_start, "end": parent_end, "anchor": "1.1 First clause"}
+            ],
+            scope_quote="1.2 Second clause",
+        )
+        payload, report = prepare(self.path, "Fixture Product", self.sections)
+        self.assertIn("【本段原文责任标题】\n1.2 Second clause", payload["text"])
+        self.assertEqual(report["chunks"][1]["parent_spans"][0]["start"], parent_start)
+
+    def test_scope_heading_cannot_be_borrowed_from_another_clause(self):
+        self.sections[1]["scope_quote"] = "1.1 First clause"
+        with self.assertRaises(ValueError):
+            prepare(self.path, "Fixture Product", self.sections)
+
+    def test_parent_context_cannot_include_future_or_changed_text(self):
+        for parent in [
+            {"start": 0, "end": len(self.text), "anchor": "# Fixture"},
+            {"start": 0, "end": 5, "anchor": "changed"},
+        ]:
+            self.sections[1]["parent_spans"] = [parent]
+            with self.assertRaises(ValueError):
+                prepare(self.path, "Fixture Product", self.sections)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,0 +1,2253 @@
+{
+  "来源页面": "https://www.beijinglife.com.cn/publicInfo/basicInfo/productBasicInfo/",
+  "抓取时间": "2026-11-04T11:44:22.371038+00:00",
+  "产品": [
+    {
+      "目录": "京安心",
+      "官网产品名": "北京人寿京安心老年人意外伤害保险",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=26365"
+          ],
+          "状态": "已下载",
+          "文件": "京安心/北京人寿京安心老年人意外伤害保险条款.pdf",
+          "字节": 1115008,
+          "sha256": "24fcba1bbc367760fe25459cdaf35316c54545a110f7babd033429c47999c18d"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=26900"
+          ],
+          "状态": "已下载",
+          "文件": "京安心/北京人寿京安心老年人意外伤害保险费率表.pdf",
+          "字节": 277415,
+          "sha256": "a926531b6f994bf14cfe5ba572e1edfeade6249a5c3b82dd1d78aa3d8a3b9ba8"
+        },
+        "现金价值表": {
+          "官网单元格": "",
+          "来源": [],
+          "状态": "官网未提供链接"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=27272"
+          ],
+          "状态": "已下载",
+          "文件": "京安心/北京人寿京安心老年人意外伤害保险产品说明书.pdf",
+          "字节": 213752,
+          "sha256": "b4e067f526384a766280112ecaf60a3e363f1b0451c4d1a8de5549fbf3c930cb"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京安泰",
+      "官网产品名": "北京人寿京安泰综合意外伤害保险",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=26363"
+          ],
+          "状态": "已下载",
+          "文件": "京安泰/北京人寿京安泰综合意外伤害保险条款.pdf",
+          "字节": 1273590,
+          "sha256": "60e6a9bb2a86e3f94d44f36e5da5445e98bb7d643999da88b6753d2a5b4d7bdf"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=26899"
+          ],
+          "状态": "已下载",
+          "文件": "京安泰/北京人寿京安泰综合意外伤害保险费率表.pdf",
+          "字节": 257743,
+          "sha256": "7224e8d4339c287adaeda8c3f69a09087ed282318f5efa85074c8eb2f660debb"
+        },
+        "现金价值表": {
+          "官网单元格": "",
+          "来源": [],
+          "状态": "官网未提供链接"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=27271"
+          ],
+          "状态": "已下载",
+          "文件": "京安泰/北京人寿京安泰综合意外伤害保险产品说明书.pdf",
+          "字节": 205183,
+          "sha256": "ca84ee51f3bd2712b3ba0cd917117bce5f0576f3e0a1aa894e00b71324874ae6"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京富一生（臻享版）",
+      "官网产品名": "北京人寿京富一生（臻享版）年金保险",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28543"
+          ],
+          "状态": "已下载",
+          "文件": "京富一生（臻享版）/北京人寿京富一生（臻享版）年金保险条款.pdf",
+          "字节": 386552,
+          "sha256": "4a06bd7d050ac0b0ca3a10cf93c441d0f5e2efeaa1aeca58a83ec2eac76e0575"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28544"
+          ],
+          "状态": "已下载",
+          "文件": "京富一生（臻享版）/北京人寿京富一生（臻享版）年金保险费率表.pdf",
+          "字节": 46582,
+          "sha256": "70b26caaa6263dcb1c4e6ce4d5d81104647af875bbd686584e642942f2d1fd02"
+        },
+        "现金价值表": {
+          "官网单元格": "现金价值表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28545"
+          ],
+          "状态": "已下载",
+          "文件": "京富一生（臻享版）/北京人寿京富一生（臻享版）年金保险现金价值表.xlsx",
+          "字节": 1476611,
+          "sha256": "33260e1d47295528d85b31043def2e972ee00268c13e2b7c215b416a09daf5f4"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明书",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28546"
+          ],
+          "状态": "已下载",
+          "文件": "京富一生（臻享版）/北京人寿京富一生（臻享版）年金保险产品说明书.pdf",
+          "字节": 217704,
+          "sha256": "56588688b17638f11d9a72a8b087da17fa62c95cbb8cee4d14af484380210b87"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京富守护星",
+      "官网产品名": "北京人寿京富守护星年金保险",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28117"
+          ],
+          "状态": "已下载",
+          "文件": "京富守护星/北京人寿京富守护星年金保险条款.pdf",
+          "字节": 644124,
+          "sha256": "72c895339b785ee39c614b70733f7668b9408be6d541fd00030f6ecb94f5fb61"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28118"
+          ],
+          "状态": "已下载",
+          "文件": "京富守护星/北京人寿京富守护星年金保险费率表.pdf",
+          "字节": 117213,
+          "sha256": "01fc85bccfec82d7e98fa240f15d83b760827676c44f105bf673989a7b43d514"
+        },
+        "现金价值表": {
+          "官网单元格": "现金价值表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28119"
+          ],
+          "状态": "已下载",
+          "文件": "京富守护星/北京人寿京富守护星年金保险现金价值表.xlsx",
+          "字节": 4068851,
+          "sha256": "be4d402778c6f1295823a0aa365d4bd3adecb978a45319b36c893f572c5db88e"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明书",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28120"
+          ],
+          "状态": "已下载",
+          "文件": "京富守护星/北京人寿京富守护星年金保险产品说明书.pdf",
+          "字节": 466979,
+          "sha256": "e5256d37da58061d375563b7f8b391505833aa102bc9607da374d5828088c713"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京富添利",
+      "官网产品名": "北京人寿京富添利终身寿险（万能型）",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28078"
+          ],
+          "状态": "已下载",
+          "文件": "京富添利/北京人寿京富添利终身寿险（万能型）条款.pdf",
+          "字节": 769316,
+          "sha256": "f19e913f9f06ed9fd5087d6c40ca77145b3444b1c187f2407ef7404e49148732"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28079"
+          ],
+          "状态": "已下载",
+          "文件": "京富添利/北京人寿京富添利终身寿险（万能型）费率表.pdf",
+          "字节": 305415,
+          "sha256": "fccd4e862a9f9234937c2a89389b96d5a0c61cfe991ee0a14a0681f7dd4e3104"
+        },
+        "现金价值表": {
+          "官网单元格": "",
+          "来源": [],
+          "状态": "官网未提供链接"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明书",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28080"
+          ],
+          "状态": "已下载",
+          "文件": "京富添利/北京人寿京富添利终身寿险（万能型）产品说明书.pdf",
+          "字节": 529963,
+          "sha256": "b11a05552dacc504a7e9b0483e8be8cebec4a21cce5c89b6b00fa90af4d0da27"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京富盈利（七周年）",
+      "官网产品名": "北京人寿京富盈利（七周年版）年金保险",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28133"
+          ],
+          "状态": "已下载",
+          "文件": "京富盈利（七周年）/北京人寿京富盈利（七周年版）年金保险条款.pdf",
+          "字节": 626119,
+          "sha256": "34a1c0467323404c7d55b4a2417b954770a0eacec20d2a3af7c35175a8f47fac"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28134"
+          ],
+          "状态": "已下载",
+          "文件": "京富盈利（七周年）/北京人寿京富盈利（七周年版）年金保险费率表.pdf",
+          "字节": 48619,
+          "sha256": "ce4b2ff6b19f7b475f4cdbce92a2b9e835c79c35a5c2e10967a5add987e45b54"
+        },
+        "现金价值表": {
+          "官网单元格": "现金价值表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28135"
+          ],
+          "状态": "已下载",
+          "文件": "京富盈利（七周年）/北京人寿京富盈利（七周年版）年金保险现金价值表.xlsx",
+          "字节": 96302,
+          "sha256": "f29e531f3d67479e2e17c1703141dcae2d8685aa8f49efd856429e7eca8c5aa6"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明书",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28136"
+          ],
+          "状态": "已下载",
+          "文件": "京富盈利（七周年）/北京人寿京富盈利（七周年版）年金保险产品说明书.pdf",
+          "字节": 375326,
+          "sha256": "966155bdff02a273c7e115ef0598d12dff19da531985294557bec5b8787cd316"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京富盈利（万能型）",
+      "官网产品名": "北京人寿京富盈利终身寿险（万能型）",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28536"
+          ],
+          "状态": "已下载",
+          "文件": "京富盈利（万能型）/北京人寿京富盈利终身寿险（万能型）条款.pdf",
+          "字节": 620118,
+          "sha256": "91217a4d53026752fa60f2c25db6951e976f5dcbe7ccfc519aa337d0ec56dba7"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28537"
+          ],
+          "状态": "已下载",
+          "文件": "京富盈利（万能型）/北京人寿京富盈利终身寿险（万能型）费率表.pdf",
+          "字节": 98546,
+          "sha256": "5f98b6c4c71768a7905fe0e72588b70f66fc54ef6a9ac90677a979c1fde17488"
+        },
+        "现金价值表": {
+          "官网单元格": "",
+          "来源": [],
+          "状态": "官网未提供链接"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明书",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28538"
+          ],
+          "状态": "已下载",
+          "文件": "京富盈利（万能型）/北京人寿京富盈利终身寿险（万能型）产品说明书.pdf",
+          "字节": 314171,
+          "sha256": "b766bc15162fdb200992767446bd824f4628293cc8e58bd9502406b7f1660c68"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京富盈利（八周年版）",
+      "官网产品名": "北京人寿京富盈利（八周年版）年金保险（分红型）",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28539"
+          ],
+          "状态": "已下载",
+          "文件": "京富盈利（八周年版）/北京人寿京富盈利（八周年版）年金保险（分红型）条款.pdf",
+          "字节": 392880,
+          "sha256": "1c0cf8738ecfb404aa44b0ee6fc5d4bf55c9958ec092d2f35d5d96507b3a694e"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28540"
+          ],
+          "状态": "已下载",
+          "文件": "京富盈利（八周年版）/北京人寿京富盈利（八周年版）年金保险（分红型）费率表.pdf",
+          "字节": 43605,
+          "sha256": "9753253ecf0bb71c520e340b1e8e798b16b42903fe48784e4232230136c333cf"
+        },
+        "现金价值表": {
+          "官网单元格": "现金价值表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28541"
+          ],
+          "状态": "已下载",
+          "文件": "京富盈利（八周年版）/北京人寿京富盈利（八周年版）年金保险（分红型）现金价值表.xlsx",
+          "字节": 990109,
+          "sha256": "744787207e470b3e1eefb0f20ea7ec0004850ca46e3d33b8c07e2bd238171937"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明书",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28542"
+          ],
+          "状态": "已下载",
+          "文件": "京富盈利（八周年版）/北京人寿京富盈利（八周年版）年金保险（分红型）产品说明书.pdf",
+          "字节": 255907,
+          "sha256": "e5dba33f3e7863eefeadfc80b98df09ac21e2f86cfb07bc2df11708f0b4888eb"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京富盈嘉",
+      "官网产品名": "北京人寿京富盈嘉年金保险（分红型）",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28637"
+          ],
+          "状态": "已下载",
+          "文件": "京富盈嘉/北京人寿京富盈嘉年金保险（分红型）条款.pdf",
+          "字节": 372456,
+          "sha256": "e27fb72740854f816adb0cc2a21f172ebc622713c8b8bf6bb8407c99edfd46d9"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28487"
+          ],
+          "状态": "已下载",
+          "文件": "京富盈嘉/北京人寿京富盈嘉年金保险（分红型）费率表.pdf",
+          "字节": 64850,
+          "sha256": "db459c59fa3130cd4e59f0569e7fcdc8b1ae344d3a1a216b141893d0a7648a3d"
+        },
+        "现金价值表": {
+          "官网单元格": "现金价值表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28582"
+          ],
+          "状态": "已下载",
+          "文件": "京富盈嘉/北京人寿京富盈嘉年金保险（分红型）现金价值表.xlsx",
+          "字节": 1354534,
+          "sha256": "5bc486a520498e5e121c2061ed999eb9c5bd821a8e38388edb55be1ffa056e0d"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明书",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28638"
+          ],
+          "状态": "已下载",
+          "文件": "京富盈嘉/北京人寿京富盈嘉年金保险（分红型）产品说明书.pdf",
+          "字节": 244764,
+          "sha256": "c803c8893441f98eb8999d9eafe1a23ed82df6c7f6c392f485d2e1fe0227826b"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京富盈禧",
+      "官网产品名": "北京人寿京富盈禧年金保险",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28547"
+          ],
+          "状态": "已下载",
+          "文件": "京富盈禧/北京人寿京富盈禧年金保险条款.pdf",
+          "字节": 546108,
+          "sha256": "f73b45bccf143a7fbb89f78874f17615e3c84bcf5af1658975d5e817822a5dd1"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28548"
+          ],
+          "状态": "已下载",
+          "文件": "京富盈禧/北京人寿京富盈禧年金保险费率表.pdf",
+          "字节": 46255,
+          "sha256": "10f4323722f12dc4f047583919ee60aa49ed823eba19d8e31b43327534fe5b99"
+        },
+        "现金价值表": {
+          "官网单元格": "现金价值表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28549"
+          ],
+          "状态": "已下载",
+          "文件": "京富盈禧/北京人寿京富盈禧年金保险现金价值表.xlsx",
+          "字节": 1531301,
+          "sha256": "2f5f31cd841f2f295c6600b52fce02a572fec74515182002eef6fdc09c5960f2"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明书",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28550"
+          ],
+          "状态": "已下载",
+          "文件": "京富盈禧/北京人寿京富盈禧年金保险产品说明书.pdf",
+          "字节": 317055,
+          "sha256": "c52adb929ee60ce1c6281ddabf86db5ee7fa5302509c90407b78827891c7e167"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京富鑫禧（御享版）",
+      "官网产品名": "北京人寿京富鑫禧（御享版）年金保险",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28177"
+          ],
+          "状态": "已下载",
+          "文件": "京富鑫禧（御享版）/北京人寿京富鑫禧（御享版）年金保险条款.pdf",
+          "字节": 645703,
+          "sha256": "abbd300820c576c2ba09d20edbeda2eeb5e502e391576d4c059b9c4e1c590850"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28178"
+          ],
+          "状态": "已下载",
+          "文件": "京富鑫禧（御享版）/北京人寿京富鑫禧（御享版）年金保险费率表.pdf",
+          "字节": 73768,
+          "sha256": "7504b5ba513c57a33e617e2279ff4b536c14f363690e70df3b2b7ce75216eb14"
+        },
+        "现金价值表": {
+          "官网单元格": "现金价值表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28179"
+          ],
+          "状态": "已下载",
+          "文件": "京富鑫禧（御享版）/北京人寿京富鑫禧（御享版）年金保险现金价值表.xlsx",
+          "字节": 5687568,
+          "sha256": "d731444fe069146833ae7302b8acf45ced7ecb5cd98c6c23861af7f999dc125c"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明书",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28180"
+          ],
+          "状态": "已下载",
+          "文件": "京富鑫禧（御享版）/北京人寿京富鑫禧（御享版）年金保险产品说明书.pdf",
+          "字节": 465666,
+          "sha256": "fb38bcd49f601b5759ffba5839824265c899960bd3f3724f5ea4559cf8bd061f"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京富鑫禧（恒裕版）",
+      "官网产品名": "北京人寿京富鑫禧（恒裕版）年金保险（分红型）",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28633"
+          ],
+          "状态": "已下载",
+          "文件": "京富鑫禧（恒裕版）/北京人寿京富鑫禧（恒裕版）年金保险（分红型）条款.pdf",
+          "字节": 444905,
+          "sha256": "222f9e76e05d5f249e83857e55dfea2fa9780dcb0ef04b8dc495de15c0d09edf"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28347"
+          ],
+          "状态": "已下载",
+          "文件": "京富鑫禧（恒裕版）/北京人寿京富鑫禧（恒裕版）年金保险（分红型）费率表.pdf",
+          "字节": 55418,
+          "sha256": "4b38f77ac3af678edda45a19ba76818f41c5beee6c0138bb35c9507afad772d5"
+        },
+        "现金价值表": {
+          "官网单元格": "现金价值表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28348"
+          ],
+          "状态": "已下载",
+          "文件": "京富鑫禧（恒裕版）/北京人寿京富鑫禧（恒裕版）年金保险（分红型）现金价值表.xlsx",
+          "字节": 2390192,
+          "sha256": "ea2e8b568a243a62accd98abfbf2f2899db6ddf20497e40e248884643c1ca47b"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明书",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28634"
+          ],
+          "状态": "已下载",
+          "文件": "京富鑫禧（恒裕版）/北京人寿京富鑫禧（恒裕版）年金保险（分红型）产品说明书.pdf",
+          "字节": 416706,
+          "sha256": "446215dcb0bb63fcb65ca47fdc5f315244be98d2c3a80c971b36362cfa9a4f36"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京康乐享（B款）",
+      "官网产品名": "北京人寿京康乐享（B款）医疗保险",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=26040"
+          ],
+          "状态": "已下载",
+          "文件": "京康乐享（B款）/北京人寿京康乐享（B款）医疗保险条款.pdf",
+          "字节": 1122304,
+          "sha256": "7381550429f55e0133806f2d76989ac1dead8ac6bd69b77eeba053ad070745b5"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=26881"
+          ],
+          "状态": "已下载",
+          "文件": "京康乐享（B款）/北京人寿京康乐享（B款）医疗保险费率表.pdf",
+          "字节": 350773,
+          "sha256": "473d883ed14ebd3254bbd612262d3bbfb65af456848aa8bd82ddd4b5bce3ebc1"
+        },
+        "现金价值表": {
+          "官网单元格": "",
+          "来源": [],
+          "状态": "官网未提供链接"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=27267"
+          ],
+          "状态": "已下载",
+          "文件": "京康乐享（B款）/北京人寿京康乐享（B款）医疗保险产品说明书.pdf",
+          "字节": 218575,
+          "sha256": "cee01aebd72823844fa071eae6359063e7719eb83ea6f38009f7e170b623ecdc"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京康优护",
+      "官网产品名": "北京人寿京康优护医疗保险",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=26175",
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=26176"
+          ],
+          "状态": "已下载多个链接",
+          "文件明细": [
+            {
+              "文件": "京康优护/北京人寿京康优护医疗保险条款.pdf",
+              "来源": "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=26175",
+              "字节": 589851,
+              "sha256": "144cff9c1e36b2358f6f077acc607d532577aaf8579fd730e09bc9d131f76515"
+            },
+            {
+              "文件": "京康优护/北京人寿京康优护医疗保险条款.pdf",
+              "来源": "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=26176",
+              "字节": 589851,
+              "sha256": "144cff9c1e36b2358f6f077acc607d532577aaf8579fd730e09bc9d131f76515"
+            }
+          ]
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=26887"
+          ],
+          "状态": "已下载",
+          "文件": "京康优护/北京人寿京康优护医疗保险费率表.pdf",
+          "字节": 612752,
+          "sha256": "be9149910e7252db7e6151b97fa1432c8e0337d4055a8fbf7ae4675072c65316"
+        },
+        "现金价值表": {
+          "官网单元格": "",
+          "来源": [],
+          "状态": "官网未提供链接"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=27268"
+          ],
+          "状态": "已下载",
+          "文件": "京康优护/北京人寿京康优护医疗保险产品说明书.pdf",
+          "字节": 189091,
+          "sha256": "81992a93b380a2b59edaaee811574b63f66650e7e0382614d0950db8ccff7cfe"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京康宝贝",
+      "官网产品名": "北京人寿京康宝贝（优选版）重大疾病保险",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28097"
+          ],
+          "状态": "已下载",
+          "文件": "京康宝贝/北京人寿京康宝贝（优选版）重大疾病保险条款.pdf",
+          "字节": 2377721,
+          "sha256": "f0ed1aa686f30aa3535818416479556783c19253c7e93b4a513177b153666e3b"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28098"
+          ],
+          "状态": "已下载",
+          "文件": "京康宝贝/北京人寿京康宝贝（优选版）重大疾病保险费率表.pdf",
+          "字节": 200865,
+          "sha256": "68bbc06067b5e54c7e27c27fa7124a630ea832a44124954a5ce32cb2b5dca2a5"
+        },
+        "现金价值表": {
+          "官网单元格": "现金价值表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28099"
+          ],
+          "状态": "已下载",
+          "文件": "京康宝贝/北京人寿京康宝贝（优选版）重大疾病保险现金价值表.xlsx",
+          "字节": 751713,
+          "sha256": "fa671d795cacc28f3f62a7a01a4d724610c41fd22d683ea9094e71cde9e5d964"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明书",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28100"
+          ],
+          "状态": "已下载",
+          "文件": "京康宝贝/北京人寿京康宝贝（优选版）重大疾病保险产品说明书.pdf",
+          "字节": 589570,
+          "sha256": "e18fed2bcc3b6e22270318737c6fe1241d88e863725237f033f1e1e5dd496ecf"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京康岁悦",
+      "官网产品名": "北京人寿京康岁悦长期护理保险",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28153"
+          ],
+          "状态": "已下载",
+          "文件": "京康岁悦/北京人寿京康岁悦长期护理保险条款.pdf",
+          "字节": 780705,
+          "sha256": "3bed7df9ec3085bc06a35c8437967c18c14614a3ebd2c9487c96295d1d2c2595"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28154"
+          ],
+          "状态": "已下载",
+          "文件": "京康岁悦/北京人寿京康岁悦长期护理保险费率表.pdf",
+          "字节": 60739,
+          "sha256": "d309c555c10d8db6c8561787e16808a7a12e4834329bb593c8d0181595aa433a"
+        },
+        "现金价值表": {
+          "官网单元格": "现金价值表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28155"
+          ],
+          "状态": "已下载",
+          "文件": "京康岁悦/北京人寿京康岁悦长期护理保险现金价值表.xlsx",
+          "字节": 805587,
+          "sha256": "7faf1b2ea22e426e5066219be26efeffde99eef178f1bf1837c3b69aca3a327d"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明书",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28156"
+          ],
+          "状态": "已下载",
+          "文件": "京康岁悦/北京人寿京康岁悦长期护理保险产品说明书.pdf",
+          "字节": 335399,
+          "sha256": "0755cd1f04f1a87328522fd0967523d7a965857debf3f720b333416758c9476a"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京康岁悦（2026版）",
+      "官网产品名": "北京人寿京康岁悦（2026版）终身护理保险",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28497"
+          ],
+          "状态": "已下载",
+          "文件": "京康岁悦（2026版）/北京人寿京康岁悦（2026版）终身护理保险条款.pdf",
+          "字节": 533119,
+          "sha256": "512bf86e4d95d24aea25e5a76b722931fba3cdf11c7aa19f4e2ea5f125b3a252"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28498"
+          ],
+          "状态": "已下载",
+          "文件": "京康岁悦（2026版）/北京人寿京康岁悦（2026版）终身护理保险费率表.pdf",
+          "字节": 67125,
+          "sha256": "30f9938133976c02db17fc01a8fdfe75e136572a41e562c7296c1ca1edfb0c3f"
+        },
+        "现金价值表": {
+          "官网单元格": "现金价值表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28499"
+          ],
+          "状态": "已下载",
+          "文件": "京康岁悦（2026版）/北京人寿京康岁悦（2026版）终身护理保险现金价值表.xlsx",
+          "字节": 1311848,
+          "sha256": "ad33e5e74454494f57c44e62ce949df1746271c36e86a95f09819d29524916f5"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明书",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28500"
+          ],
+          "状态": "已下载",
+          "文件": "京康岁悦（2026版）/北京人寿京康岁悦（2026版）终身护理保险产品说明书.pdf",
+          "字节": 247083,
+          "sha256": "bc4425aed66fc1d3ad6ee6f8ad3f51a80e1a147ed72336091b6dc8cfc83313f1"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京康常相守",
+      "官网产品名": "北京人寿京康常相守特定疾病保险（互联网专属）",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28644"
+          ],
+          "状态": "已下载",
+          "文件": "京康常相守/北京人寿京康常相守特定疾病保险（互联网专属）条款.pdf",
+          "字节": 921090,
+          "sha256": "93fedc2d3fcdbb3973f70d30d8de5bc3319da090a09ca9ec405b268d2f3e36ed"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28645"
+          ],
+          "状态": "已下载",
+          "文件": "京康常相守/北京人寿京康常相守特定疾病保险（互联网专属）费率表.pdf",
+          "字节": 162691,
+          "sha256": "44ba8b4ba0216744db89d332d77a07e5464e12f0b6ce01abab2c0537e90aa00d"
+        },
+        "现金价值表": {
+          "官网单元格": "现金价值表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28646"
+          ],
+          "状态": "已下载",
+          "文件": "京康常相守/北京人寿京康常相守特定疾病保险（互联网专属）现金价值表.xlsx",
+          "字节": 3344955,
+          "sha256": "52b97dbd7c749b912513fabb1ab9c7bc7a1db616ba0c08a4526bcdece0862e34"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明书",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28647"
+          ],
+          "状态": "已下载",
+          "文件": "京康常相守/北京人寿京康常相守特定疾病保险（互联网专属）产品说明书.pdf",
+          "字节": 417795,
+          "sha256": "f5ccef41a6a6e06302c6417e9b30ed2b0d499a78d6a68f593e6f29c7984a3932"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京康源（福佑版）",
+      "官网产品名": "北京人寿京康源（福佑版）重大疾病保险",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=27886"
+          ],
+          "状态": "已下载",
+          "文件": "京康源（福佑版）/北京人寿京康源（福佑版）重大疾病保险条款.pdf",
+          "字节": 1355645,
+          "sha256": "ddb7e7c5bcd7cc53f727fa52c506a6341d0e26f02600d6bdacee9d3a93874e43"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=27887"
+          ],
+          "状态": "已下载",
+          "文件": "京康源（福佑版）/北京人寿京康源（福佑版）重大疾病保险费率表.pdf",
+          "字节": 3381121,
+          "sha256": "a8ecf7a3397ba1ecb7744162416e0689526a5a606b6cc14eb36a7a5413060298"
+        },
+        "现金价值表": {
+          "官网单元格": "现金价值表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=27888"
+          ],
+          "状态": "已下载",
+          "文件": "京康源（福佑版）/北京人寿京康源（福佑版）重大疾病保险现金价值表.xlsx",
+          "字节": 10140807,
+          "sha256": "c1870cb06944d7e7b4aca745cc7a537fc160b8af0467589784a3cb0c5b0af627"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明书",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=27889"
+          ],
+          "状态": "已下载",
+          "文件": "京康源（福佑版）/北京人寿京康源（福佑版）重大疾病保险产品说明书.pdf",
+          "字节": 428023,
+          "sha256": "0967c1faebc0d9d7fc857c42b3a1331482e9c496f26b0ba5a481dffe47717e90"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京福世享（典藏版）",
+      "官网产品名": "北京人寿京福世享（典藏版）终身寿险（分红型）",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28639"
+          ],
+          "状态": "已下载",
+          "文件": "京福世享（典藏版）/北京人寿京福世享（典藏版）终身寿险（分红型）条款.pdf",
+          "字节": 439927,
+          "sha256": "6950532c1fb9ea7cb94342c663dd3c17af700a0eeae0aab127a1e2eb37825992"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28490"
+          ],
+          "状态": "已下载",
+          "文件": "京福世享（典藏版）/北京人寿京福世享（典藏版）终身寿险（分红型）费率表.pdf",
+          "字节": 50357,
+          "sha256": "7b71482bf9b2e3b943f044e420554f6e4e331c5dd7487dab7479b7e950c725a9"
+        },
+        "现金价值表": {
+          "官网单元格": "现金价值表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28491"
+          ],
+          "状态": "已下载",
+          "文件": "京福世享（典藏版）/北京人寿京福世享（典藏版）终身寿险（分红型）现金价值表.xlsx",
+          "字节": 1517386,
+          "sha256": "a301d0e838ba2443f2cad2af56bdbc8ceb110c5bdddefad55f4d0129364cdd90"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明书",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28640"
+          ],
+          "状态": "已下载",
+          "文件": "京福世享（典藏版）/北京人寿京福世享（典藏版）终身寿险（分红型）产品说明书.pdf",
+          "字节": 265790,
+          "sha256": "d3047521c7a08b472e290f2f1d34a84dfafe474c793a8579be7dc3fe830343bc"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京福临门",
+      "官网产品名": "北京人寿京福临门终身寿险（分红型）",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28621"
+          ],
+          "状态": "已下载",
+          "文件": "京福临门/北京人寿京福临门终身寿险（分红型）条款.pdf",
+          "字节": 433789,
+          "sha256": "8942ef7f0ec5e2618a7d66d7c9dee8806dd7c21d4bf5fd69207cda7b7fa6839e"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=27977"
+          ],
+          "状态": "已下载",
+          "文件": "京福临门/北京人寿京福临门终身寿险（分红型）费率表.pdf",
+          "字节": 106344,
+          "sha256": "688b3d78cffbb05f6ac28e7ee7439a7bf2b8f1b66fd196d73dee5c134114b5fc"
+        },
+        "现金价值表": {
+          "官网单元格": "现金价值表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=27978"
+          ],
+          "状态": "已下载",
+          "文件": "京福临门/北京人寿京福临门终身寿险（分红型）现金价值表.xlsx",
+          "字节": 3009822,
+          "sha256": "4b2a97d62df1cf11d95981427632475fd043e6cd4c2cbaa484b3cb4eb756ad78"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明书",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28622"
+          ],
+          "状态": "已下载",
+          "文件": "京福临门/北京人寿京福临门终身寿险（分红型）产品说明书.pdf",
+          "字节": 264431,
+          "sha256": "a7c650c3a0ff5c8b971f431e4115513e3eb82ba6e0a8341415196c8c1107b966"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京福乐享",
+      "官网产品名": "北京人寿京福乐享终身寿险（分红型）",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28625"
+          ],
+          "状态": "已下载",
+          "文件": "京福乐享/北京人寿京福乐享终身寿险（分红型）条款.pdf",
+          "字节": 433850,
+          "sha256": "866e7e3bff996fb6b9560a9eb68e1b1760ff7f850eb4dedb7de1bb73c0d9c317"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28231"
+          ],
+          "状态": "已下载",
+          "文件": "京福乐享/北京人寿京福乐享终身寿险（分红型）费率表.pdf",
+          "字节": 60981,
+          "sha256": "013993f95277199e6b4a82d645ca0bd5a0e714093dc869b88b56a28c6c396ecf"
+        },
+        "现金价值表": {
+          "官网单元格": "现金价值表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28232"
+          ],
+          "状态": "已下载",
+          "文件": "京福乐享/北京人寿京福乐享终身寿险（分红型）现金价值表.xlsx",
+          "字节": 3002237,
+          "sha256": "e0fee63fdd2c83032e0a38730a896a000be407c5266468bf163819cd54548553"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明书",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28626"
+          ],
+          "状态": "已下载",
+          "文件": "京福乐享/北京人寿京福乐享终身寿险（分红型）产品说明书.pdf",
+          "字节": 264358,
+          "sha256": "7ab55929524f976f2e49f0771730549c73881a217fface9f921905a3e2fbea26"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京福乐享（臻享版）",
+      "官网产品名": "北京人寿京福乐享（臻享版）终身寿险（分红型）",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28583"
+          ],
+          "状态": "已下载",
+          "文件": "京福乐享（臻享版）/北京人寿京福乐享（臻享版）终身寿险（分红型）条款.pdf",
+          "字节": 633997,
+          "sha256": "35e4dcfc6eff07a47854ab55489d5622f0789bdc819fd5b7271bc6418d5ad761"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28584"
+          ],
+          "状态": "已下载",
+          "文件": "京福乐享（臻享版）/北京人寿京福乐享（臻享版）终身寿险（分红型）费率表.xlsx",
+          "字节": 18609,
+          "sha256": "82cf274bf1838b84abc3124e79733ca73dfa93f54255d9cc0ecc72cc1b8d44b3"
+        },
+        "现金价值表": {
+          "官网单元格": "现金价值表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28585"
+          ],
+          "状态": "已下载",
+          "文件": "京福乐享（臻享版）/北京人寿京福乐享（臻享版）终身寿险（分红型）现金价值表.xlsx",
+          "字节": 1331903,
+          "sha256": "e62e8a6af03fe2cd548676f7ec379526c4a7e41312e38a309e35025a3783b0d8"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明书",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28586"
+          ],
+          "状态": "已下载",
+          "文件": "京福乐享（臻享版）/北京人寿京福乐享（臻享版）终身寿险（分红型）产品说明书.pdf",
+          "字节": 397334,
+          "sha256": "7b723d0863e47c404fb151606f1b158c60a17729954c6a1867eee2ec825f7caf"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京福传世爱（如意版）",
+      "官网产品名": "北京人寿京福传世爱（如意版）终身寿险（分红型）",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28628"
+          ],
+          "状态": "已下载",
+          "文件": "京福传世爱（如意版）/北京人寿京福传世爱（如意版）终身寿险（分红型）条款.pdf",
+          "字节": 668538,
+          "sha256": "ba1c821c4a47062b989a3df666dfafba315b672081aa3ffe789d131fa6e3c432"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28324"
+          ],
+          "状态": "已下载",
+          "文件": "京福传世爱（如意版）/北京人寿京福传世爱（如意版）终身寿险（分红型）费率表.pdf",
+          "字节": 70092,
+          "sha256": "810c967e65461cd31e5c77ef2691796fe378bed67339bba1b7fe83f92de92fee"
+        },
+        "现金价值表": {
+          "官网单元格": "现金价值表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28325"
+          ],
+          "状态": "已下载",
+          "文件": "京福传世爱（如意版）/北京人寿京福传世爱（如意版）终身寿险（分红型）现金价值表.xlsx",
+          "字节": 2421100,
+          "sha256": "5c504ab866622b625607203561568ea712eb5e4119478ab32fa88386362ffe88"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明书",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28629"
+          ],
+          "状态": "已下载",
+          "文件": "京福传世爱（如意版）/北京人寿京福传世爱（如意版）终身寿险（分红型）产品说明书.pdf",
+          "字节": 325260,
+          "sha256": "51a4838e5637996bcb4a23ca0095c1a065b9e9aba58d5acc8b50cb91da6646c5"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京福传世爱（福耀版）",
+      "官网产品名": "北京人寿京福传世爱（福耀版）终身寿险",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28289"
+          ],
+          "状态": "已下载",
+          "文件": "京福传世爱（福耀版）/北京人寿京福传世爱（福耀版）终身寿险条款.pdf",
+          "字节": 726271,
+          "sha256": "91c72c29db270907f14232c6f3c498bbdb02c5cba517e3238b9cad678683ec7c"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28290"
+          ],
+          "状态": "已下载",
+          "文件": "京福传世爱（福耀版）/北京人寿京福传世爱（福耀版）终身寿险费率表.pdf",
+          "字节": 69931,
+          "sha256": "2ac70ee189e31bfa8d3cdf38a776dda1eb0acaf39bc08b056e8ff2cecafe95f5"
+        },
+        "现金价值表": {
+          "官网单元格": "现金价值表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28291"
+          ],
+          "状态": "已下载",
+          "文件": "京福传世爱（福耀版）/北京人寿京福传世爱（福耀版）终身寿险现金价值表.xlsx",
+          "字节": 2810961,
+          "sha256": "bcaf03742885b9b975d9d9a73ded78622b50081dec1902c3c239e8d8525fd0c2"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明书",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28292"
+          ],
+          "状态": "已下载",
+          "文件": "京福传世爱（福耀版）/北京人寿京福传世爱（福耀版）终身寿险产品说明书.pdf",
+          "字节": 295167,
+          "sha256": "1d07d085e072eeaa9e13c7ff44c5d99d854b26829a986e0fcb261b23ad149799"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京福多多D款",
+      "官网产品名": "北京人寿京福多多D款终身寿险",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28618"
+          ],
+          "状态": "已下载",
+          "文件": "京福多多D款/北京人寿京福多多D款终身寿险条款.pdf",
+          "字节": 379645,
+          "sha256": "b66c7866e8cbac5e74d8aa8445d0097688679a58a59e69b39388af05d6ed3e59"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=27961"
+          ],
+          "状态": "已下载",
+          "文件": "京福多多D款/北京人寿京福多多D款终身寿险费率表.pdf",
+          "字节": 130415,
+          "sha256": "e3f65fd8168cccb164f8c260da039ac73b0362f34464f733e98e573297457c01"
+        },
+        "现金价值表": {
+          "官网单元格": "现金价值表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=27962"
+          ],
+          "状态": "已下载",
+          "文件": "京福多多D款/北京人寿京福多多D款终身寿险现金价值表.xlsx",
+          "字节": 3390194,
+          "sha256": "6ad45f365f1fa994a2c67c49d8f7c3ae500054b4e542d952b14d4b5d4e7d02a9"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明书",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=27963"
+          ],
+          "状态": "已下载",
+          "文件": "京福多多D款/北京人寿京福多多D款终身寿险产品说明书.pdf",
+          "字节": 357294,
+          "sha256": "1f8fe4ceac599629c3505b1db6adb19af555bd364eef718e6937b18eed97d28e"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京福安鑫",
+      "官网产品名": "北京人寿京福安鑫终身寿险（分红型）",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28659"
+          ],
+          "状态": "已下载",
+          "文件": "京福安鑫/北京人寿京福安鑫终身寿险（分红型）条款.pdf",
+          "字节": 670434,
+          "sha256": "15f66168d4861c98a72308a5141da7f9bd17356255aa9f40fff2fcad7018d1f9"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28660"
+          ],
+          "状态": "已下载",
+          "文件": "京福安鑫/北京人寿京福安鑫终身寿险（分红型）费率表.pdf",
+          "字节": 156603,
+          "sha256": "b9add38966cf546d99caf1674261b0e85f00018239bd8b856e5bb2332102a52b"
+        },
+        "现金价值表": {
+          "官网单元格": "现金价值表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28661"
+          ],
+          "状态": "已下载",
+          "文件": "京福安鑫/北京人寿京福安鑫终身寿险（分红型）现金价值表.xlsx",
+          "字节": 2233467,
+          "sha256": "b5bc3fa4e561f422347f95a33d63fd867527f50ded672a29b2d44b14e66ee0b8"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明书",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28662"
+          ],
+          "状态": "已下载",
+          "文件": "京福安鑫/北京人寿京福安鑫终身寿险（分红型）产品说明书.pdf",
+          "字节": 402632,
+          "sha256": "61a6cbc6d190c10ff1b8e32573f8e3c086f1554720bed925f55c152460f08f6e"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京福宏裕（尊享版）",
+      "官网产品名": "北京人寿京福宏裕（尊享版）终身寿险（分红型）",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28070"
+          ],
+          "状态": "已下载",
+          "文件": "京福宏裕（尊享版）/北京人寿京福宏裕（尊享版）终身寿险（分红型）条款.pdf",
+          "字节": 489261,
+          "sha256": "10531cae4592378546094b8df4f7bfea4beccc99e39c5730ac8c8422f4677278"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28071"
+          ],
+          "状态": "已下载",
+          "文件": "京福宏裕（尊享版）/北京人寿京福宏裕（尊享版）终身寿险（分红型）费率表.pdf",
+          "字节": 63070,
+          "sha256": "ed3e6abe53fa720025865946e8bac7fcbe129923bfd5e277ec0982cbc34a2ecc"
+        },
+        "现金价值表": {
+          "官网单元格": "现金价值表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28072"
+          ],
+          "状态": "已下载",
+          "文件": "京福宏裕（尊享版）/北京人寿京福宏裕（尊享版）终身寿险（分红型）现金价值表.xlsx",
+          "字节": 2671834,
+          "sha256": "8a1cb2fa93288ab81be51d5ce47b59255ec46c1c9aa31cbdf7adfe9be1da658b"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明书",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28073"
+          ],
+          "状态": "已下载",
+          "文件": "京福宏裕（尊享版）/北京人寿京福宏裕（尊享版）终身寿险（分红型）产品说明书.pdf",
+          "字节": 385591,
+          "sha256": "e6f07fa9bfba5c5f27ee91f4caa85bec936486b687fd7044b54f79deb5793c3f"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京福宏运（尊享版）",
+      "官网产品名": "北京人寿京福宏运（尊享版）终身寿险（分红型）",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28066"
+          ],
+          "状态": "已下载",
+          "文件": "京福宏运（尊享版）/北京人寿京福宏运（尊享版）终身寿险（分红型）条款.pdf",
+          "字节": 630651,
+          "sha256": "484615deb682ab0e84dd10e3cc316fed1efa64ef285b1c99840e1f622b1c15e5"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28067"
+          ],
+          "状态": "已下载",
+          "文件": "京福宏运（尊享版）/北京人寿京福宏运（尊享版）终身寿险（分红型）费率表.pdf",
+          "字节": 136160,
+          "sha256": "87c1417b9e172479daa1d2b8ec12cff283ed85010993e1c3f4e2995741a29098"
+        },
+        "现金价值表": {
+          "官网单元格": "现金价值表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28068"
+          ],
+          "状态": "已下载",
+          "文件": "京福宏运（尊享版）/北京人寿京福宏运（尊享版）终身寿险（分红型）现金价值表.xlsx",
+          "字节": 2670661,
+          "sha256": "9d96acbf3c48379aff159029df33c4a61f6f665b3f46ce11863178a86efd22b7"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明书",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28069"
+          ],
+          "状态": "已下载",
+          "文件": "京福宏运（尊享版）/北京人寿京福宏运（尊享版）终身寿险（分红型）产品说明书.pdf",
+          "字节": 391015,
+          "sha256": "457a571b077352be1566e833eeeb49bfb8791dc070526f97f83c3cbf7316be46"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京福宏运（心逸版）",
+      "官网产品名": "北京人寿京福宏运（心逸版）终身寿险（分红型）",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28623"
+          ],
+          "状态": "已下载",
+          "文件": "京福宏运（心逸版）/北京人寿京福宏运（心逸版）终身寿险（分红型）条款.pdf",
+          "字节": 668045,
+          "sha256": "dbd4aeb52a7ee3f923c52555ea32da567ed8395b754e82ed5152eddcb43f6229"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28166"
+          ],
+          "状态": "已下载",
+          "文件": "京福宏运（心逸版）/北京人寿京福宏运（心逸版）终身寿险（分红型）费率表.pdf",
+          "字节": 63262,
+          "sha256": "64891da78a3202a265ca4e04c74da9b2c445032ae8385c17108f9d4f86fcc1ef"
+        },
+        "现金价值表": {
+          "官网单元格": "现金价值表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28167"
+          ],
+          "状态": "已下载",
+          "文件": "京福宏运（心逸版）/北京人寿京福宏运（心逸版）终身寿险（分红型）现金价值表.xlsx",
+          "字节": 2095787,
+          "sha256": "98e2897e980c342751c836f7c0d8fdb4b4eb3166d5ac5200b5cfb2e591890544"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明书",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28624"
+          ],
+          "状态": "已下载",
+          "文件": "京福宏运（心逸版）/北京人寿京福宏运（心逸版）终身寿险（分红型）产品说明书.pdf",
+          "字节": 396950,
+          "sha256": "dc424f3ced7d9076c7d43c389bfe6df12e676ac60c890010e1fcc21696e0b9ac"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京福宜嘉",
+      "官网产品名": "北京人寿京福宜嘉终身寿险（分红型）",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28635"
+          ],
+          "状态": "已下载",
+          "文件": "京福宜嘉/北京人寿京福宜嘉终身寿险（分红型）条款.pdf",
+          "字节": 665473,
+          "sha256": "ad88eb67ea48f9b0f62e12a33cc7adc6daaab34f465b80175226208882f158be"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28368"
+          ],
+          "状态": "已下载",
+          "文件": "京福宜嘉/北京人寿京福宜嘉终身寿险（分红型）费率表.pdf",
+          "字节": 55358,
+          "sha256": "b6a9c8c053935f1f26adb20fe7c71e46468eba250e5638db282af8bda4af9eac"
+        },
+        "现金价值表": {
+          "官网单元格": "现金价值表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28369"
+          ],
+          "状态": "已下载",
+          "文件": "京福宜嘉/北京人寿京福宜嘉终身寿险（分红型）现金价值表.xlsx",
+          "字节": 1302194,
+          "sha256": "86d6bdd9f0b88d852bd540480ed8a59235d4b675158904d43cd1e1d7ed7590e6"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明书",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28636"
+          ],
+          "状态": "已下载",
+          "文件": "京福宜嘉/北京人寿京福宜嘉终身寿险（分红型）产品说明书.pdf",
+          "字节": 362275,
+          "sha256": "943816d7c90c4555e9ad44d6e62b2c43e5af9d5feb952a6d5329b87199f8b52e"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京福恒久",
+      "官网产品名": "北京人寿京福恒久养老年金保险（分红型）",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28631"
+          ],
+          "状态": "已下载",
+          "文件": "京福恒久/北京人寿京福恒久养老年金保险（分红型）条款.pdf",
+          "字节": 389151,
+          "sha256": "f8dfea692d87e1ce3a419cbfcfd3fc25a848c42087cea5e6040cb0869cb15f0a"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28343"
+          ],
+          "状态": "已下载",
+          "文件": "京福恒久/北京人寿京福恒久养老年金保险（分红型）费率表.pdf",
+          "字节": 45774,
+          "sha256": "6ff188b8fa83752edcb6cd02a2d072c50451394c6848734bd74771455f8c41b7"
+        },
+        "现金价值表": {
+          "官网单元格": "现金价值表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28344"
+          ],
+          "状态": "已下载",
+          "文件": "京福恒久/北京人寿京福恒久养老年金保险（分红型）现金价值表.xlsx",
+          "字节": 1679784,
+          "sha256": "1bfed0caa9a5fa16aa26b08552985d764a2e28b726c9de93b81df8a674eb49d0"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明书",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28632"
+          ],
+          "状态": "已下载",
+          "文件": "京福恒久/北京人寿京福恒久养老年金保险（分红型）产品说明书.pdf",
+          "字节": 254344,
+          "sha256": "b340888e47a321034a0271b7335cf0835997198ca928f53808d3f6c64f214171"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京福恒久（尊享版）",
+      "官网产品名": "北京人寿京福恒久（尊享版）养老年金保险（分红型）",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28587"
+          ],
+          "状态": "已下载",
+          "文件": "京福恒久（尊享版）/北京人寿京福恒久（尊享版）养老年金保险（分红型）条款.pdf",
+          "字节": 378763,
+          "sha256": "701e2eb0f111439d1c45f75bb700c457e055b22d04bc1cf841b7a78bedc739dd"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28588"
+          ],
+          "状态": "已下载",
+          "文件": "京福恒久（尊享版）/北京人寿京福恒久（尊享版）养老年金保险（分红型）费率表.xlsx",
+          "字节": 18303,
+          "sha256": "1a67a67a5b5ec790316e82abe4264dff6aadb043db78aff9f7c7b56cab93f5f4"
+        },
+        "现金价值表": {
+          "官网单元格": "现金价值表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28589"
+          ],
+          "状态": "已下载",
+          "文件": "京福恒久（尊享版）/北京人寿京福恒久（尊享版）养老年金保险（分红型）现金价值表.xlsx",
+          "字节": 1422680,
+          "sha256": "0f7d4b05b5811110cb3962257ebcd1eef2f4378d63651c99c76a0d7a93495588"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明书",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28590"
+          ],
+          "状态": "已下载",
+          "文件": "京福恒久（尊享版）/北京人寿京福恒久（尊享版）养老年金保险（分红型）产品说明书.pdf",
+          "字节": 279585,
+          "sha256": "8325dda4d6b651bcebdbde15adb819cc034837c2fac87bce0e4964c7436f8fe0"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京福恒利",
+      "官网产品名": "北京人寿京福恒利终身寿险（分红型）",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28615"
+          ],
+          "状态": "已下载",
+          "文件": "京福恒利/北京人寿京福恒利终身寿险（分红型）条款.pdf",
+          "字节": 691022,
+          "sha256": "e6c3b034940e5be9c1e430079d42da61477acff0640725ea3a339831bbb6b7bc"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28616"
+          ],
+          "状态": "已下载",
+          "文件": "京福恒利/北京人寿京福恒利终身寿险（分红型）费率表.pdf",
+          "字节": 119537,
+          "sha256": "4c7238b7205f1556fb8b1b9ded2556f58645e22a8295008d0a2c0543299aba76"
+        },
+        "现金价值表": {
+          "官网单元格": "现金价值表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=27856"
+          ],
+          "状态": "已下载",
+          "文件": "京福恒利/北京人寿京福恒利终身寿险（分红型）现金价值表.xlsx",
+          "字节": 2833586,
+          "sha256": "5b114bdf8cdb0c385e8f3aeaddf22040bd4f64c84c21e59cdd5566a7d8871595"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明书",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28617"
+          ],
+          "状态": "已下载",
+          "文件": "京福恒利/北京人寿京福恒利终身寿险（分红型）产品说明书.pdf",
+          "字节": 397948,
+          "sha256": "004db92f963579ffbd365f3b4cd1c4e6e22b1ea6f7f1fea60eb3400d604e6c6c"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京福有约2.0",
+      "官网产品名": "北京人寿京福有约2.0养老年金保险",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28089"
+          ],
+          "状态": "已下载",
+          "文件": "京福有约2.0/北京人寿京福有约2.0养老年金保险条款.pdf",
+          "字节": 596157,
+          "sha256": "b03461ba21c0e5f927513b24372d5c5f72ef047bf14ad211629a08d7a8fa25c2"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28090"
+          ],
+          "状态": "已下载",
+          "文件": "京福有约2.0/北京人寿京福有约2.0养老年金保险费率表.pdf",
+          "字节": 315849,
+          "sha256": "76804b1ac8d2ed7d8df9c7b7f18a9f3ca934b68155b1ea198e1280d78a397148"
+        },
+        "现金价值表": {
+          "官网单元格": "现金价值表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28091"
+          ],
+          "状态": "已下载",
+          "文件": "京福有约2.0/北京人寿京福有约2.0养老年金保险现金价值表.xlsx",
+          "字节": 12899606,
+          "sha256": "bdec9f1adfb743dacf11db7204037a53ed1e5b285ed27aac20307d4faedc344e"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明书",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28092"
+          ],
+          "状态": "已下载",
+          "文件": "京福有约2.0/北京人寿京福有约2.0养老年金保险产品说明书.pdf",
+          "字节": 379836,
+          "sha256": "bdf33e037f7be2bb62cf3bd606bd9a63973cbd7afa075ae50a1b276a98dac054"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京福满满D款",
+      "官网产品名": "北京人寿京福满满D款终身寿险",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28619"
+          ],
+          "状态": "已下载",
+          "文件": "京福满满D款/北京人寿京福满满D款终身寿险条款.pdf",
+          "字节": 379750,
+          "sha256": "1dc91c82defe32f207c0ea23cf473c8b2c51c8595afb5e4d8db41712ea82f2b2"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=27965"
+          ],
+          "状态": "已下载",
+          "文件": "京福满满D款/北京人寿京福满满D款终身寿险费率表.pdf",
+          "字节": 129974,
+          "sha256": "a2cf3c62d9d607ea4f529777acb44e61ddb15db7e60c9191d9078d302a1b0aaa"
+        },
+        "现金价值表": {
+          "官网单元格": "现金价值表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=27966"
+          ],
+          "状态": "已下载",
+          "文件": "京福满满D款/北京人寿京福满满D款终身寿险现金价值表.xlsx",
+          "字节": 2622895,
+          "sha256": "c7af132c4e576dbe08d94e4e2f2d9100f6e57ad71ec49e0798221873a7137f68"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明书",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=27967"
+          ],
+          "状态": "已下载",
+          "文件": "京福满满D款/北京人寿京福满满D款终身寿险产品说明书.pdf",
+          "字节": 357314,
+          "sha256": "0a53fb5a44cad3737511489a91f479e1367be1b0b5e11b118a15ec931f5b5fc6"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京福盈嘉",
+      "官网产品名": "北京人寿京福盈嘉终身寿险",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28013"
+          ],
+          "状态": "已下载",
+          "文件": "京福盈嘉/北京人寿京福盈嘉终身寿险条款.pdf",
+          "字节": 649963,
+          "sha256": "cfafb291ce3c2d462193ba53e37275e8fa376c2babbffd2eb54986a1c45db2a0"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28014"
+          ],
+          "状态": "已下载",
+          "文件": "京福盈嘉/北京人寿京福盈嘉终身寿险费率表.pdf",
+          "字节": 76075,
+          "sha256": "d1ad4a5c7f9e8318296e909b05313426009331f44eb7f422379f1b095908c850"
+        },
+        "现金价值表": {
+          "官网单元格": "现金价值表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28015"
+          ],
+          "状态": "已下载",
+          "文件": "京福盈嘉/北京人寿京福盈嘉终身寿险现金价值表.xlsx",
+          "字节": 2740910,
+          "sha256": "4b42ee5dabe604c1ea6b2afa275c91bd6e494915672e08b5b4671779bfee099e"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明书",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28016"
+          ],
+          "状态": "已下载",
+          "文件": "京福盈嘉/北京人寿京福盈嘉终身寿险产品说明书.pdf",
+          "字节": 320406,
+          "sha256": "2b1064c626aaab53bb4cc7744aea4eb2b6f563308bb3e8c4914215124a214b52"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京福禄宝B款",
+      "官网产品名": "北京人寿京福禄宝B款养老年金保险",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28630"
+          ],
+          "状态": "已下载",
+          "文件": "京福禄宝B款/北京人寿京福禄宝B款养老年金保险条款.pdf",
+          "字节": 371537,
+          "sha256": "3e22d3ca6fcc10fd63df5edd3fee786bf272069397c161b177b5cfdb58dcb5d7"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28335"
+          ],
+          "状态": "已下载",
+          "文件": "京福禄宝B款/北京人寿京福禄宝B款养老年金保险费率表.pdf",
+          "字节": 45327,
+          "sha256": "dd379a6f1fc0e3023611ab88faa37c68b82302e761b7857ae6c6a6df470e7cb4"
+        },
+        "现金价值表": {
+          "官网单元格": "现金价值表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28336"
+          ],
+          "状态": "已下载",
+          "文件": "京福禄宝B款/北京人寿京福禄宝B款养老年金保险现金价值表.xlsx",
+          "字节": 2069322,
+          "sha256": "5e215078c873aef98e0f7457b47718182b08602c4f7019adfe3712d6fcb239ec"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明书",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28337"
+          ],
+          "状态": "已下载",
+          "文件": "京福禄宝B款/北京人寿京福禄宝B款养老年金保险产品说明书.pdf",
+          "字节": 221075,
+          "sha256": "346c7161eb77e278c69f1299d27871d134fc510946bdb0b23b9ece6cb1caee8b"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京福臻鑫",
+      "官网产品名": "北京人寿京福臻鑫终身寿险（分红型）",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28655"
+          ],
+          "状态": "已下载",
+          "文件": "京福臻鑫/北京人寿京福臻鑫终身寿险（分红型）条款.pdf",
+          "字节": 670922,
+          "sha256": "25ce60179f92015d71ec0a42b564b55da997d97ea6534ef2c3175a1cfd73400c"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28656"
+          ],
+          "状态": "已下载",
+          "文件": "京福臻鑫/北京人寿京福臻鑫终身寿险（分红型）费率表.pdf",
+          "字节": 77826,
+          "sha256": "ec3306aba903b994305bd39a4394e111ea092907131a57dda33611368a82f6ce"
+        },
+        "现金价值表": {
+          "官网单元格": "现金价值表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28657"
+          ],
+          "状态": "已下载",
+          "文件": "京福臻鑫/北京人寿京福臻鑫终身寿险（分红型）现金价值表.xlsx",
+          "字节": 3104352,
+          "sha256": "0d90d4ebf48abf08101a77b28a888fa5ec829a3a48639d8c8ed092459ce1195e"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明书",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28658"
+          ],
+          "状态": "已下载",
+          "文件": "京福臻鑫/北京人寿京福臻鑫终身寿险（分红型）产品说明书.pdf",
+          "字节": 403022,
+          "sha256": "32953702a305847b849bbb3be30b9ed5cc39780d9999ca0f7f56ee860ccc66b8"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京福长乐",
+      "官网产品名": "北京人寿京福长乐养老年金保险",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28620"
+          ],
+          "状态": "已下载",
+          "文件": "京福长乐/北京人寿京福长乐养老年金保险条款.pdf",
+          "字节": 373805,
+          "sha256": "3a85b2aa81fd37041d8dc251b2d2c8b6196d154cc71e0e7c2dc535e7ad9c0110"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=27973"
+          ],
+          "状态": "已下载",
+          "文件": "京福长乐/北京人寿京福长乐养老年金保险费率表.pdf",
+          "字节": 54919,
+          "sha256": "092db2c6f46df82d070c9a22965fc9dfc7a5af7281f1e143c4b1ac826d0c9f1b"
+        },
+        "现金价值表": {
+          "官网单元格": "现金价值表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=27974"
+          ],
+          "状态": "已下载",
+          "文件": "京福长乐/北京人寿京福长乐养老年金保险现金价值表.xlsx",
+          "字节": 2995390,
+          "sha256": "716b80f95f27dc9039c4ec6fc67b1272d1e3216d7a6fdb18df990fe688bc4c40"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明书",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=27975"
+          ],
+          "状态": "已下载",
+          "文件": "京福长乐/北京人寿京福长乐养老年金保险产品说明书.pdf",
+          "字节": 230544,
+          "sha256": "ec0e54931957da1f7e13189e15753c75da9e5624fe6cb619f18ad4b3ede9bdac"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京福顺意",
+      "官网产品名": "北京人寿京福顺意养老年金保险（分红型）",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28234"
+          ],
+          "状态": "已下载",
+          "文件": "京福顺意/北京人寿京福顺意养老年金保险（分红型）条款.pdf",
+          "字节": 624763,
+          "sha256": "bc0f80d244a3bbd7b38a20d0490d9fcb5e687e20400e1acaf5e8a10f971e7d21"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28235"
+          ],
+          "状态": "已下载",
+          "文件": "京福顺意/北京人寿京福顺意养老年金保险（分红型）费率表.pdf",
+          "字节": 63311,
+          "sha256": "662a75cf4411ecc597695eb9f901b28158fabce3e91bd4302fe8c5e018e653e0"
+        },
+        "现金价值表": {
+          "官网单元格": "现金价值表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28236"
+          ],
+          "状态": "已下载",
+          "文件": "京福顺意/北京人寿京福顺意养老年金保险（分红型）现金价值表.xlsx",
+          "字节": 4364284,
+          "sha256": "03163eb3933e7b46dece56d6f18dca46262cde227358f4622cf8f45f80c661f6"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明书",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28237"
+          ],
+          "状态": "已下载",
+          "文件": "京福顺意/北京人寿京福顺意养老年金保险（分红型）产品说明书.pdf",
+          "字节": 407911,
+          "sha256": "3a428f3de8fed8dc479b2611dc2989592245548eb37eb85e89c87d9900354a68"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京福顺馨",
+      "官网产品名": "北京人寿京福顺馨养老年金保险",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28157"
+          ],
+          "状态": "已下载",
+          "文件": "京福顺馨/北京人寿京福顺馨养老年金保险条款.pdf",
+          "字节": 603187,
+          "sha256": "348da1764b0e38aaf2aa97f0dac2b9f35e57f3759493577b759f8e034d1e5f50"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28158"
+          ],
+          "状态": "已下载",
+          "文件": "京福顺馨/北京人寿京福顺馨养老年金保险费率表.pdf",
+          "字节": 83581,
+          "sha256": "0bc6568f217618fac0dbbb80953808d8f4c3fba944d7038ecce1fc6873151271"
+        },
+        "现金价值表": {
+          "官网单元格": "现金价值表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28159"
+          ],
+          "状态": "已下载",
+          "文件": "京福顺馨/北京人寿京福顺馨养老年金保险现金价值表.xlsx",
+          "字节": 3014743,
+          "sha256": "7450df3a8a85ac1e448100bd2a0167f9e08daa5a25d4db249ef127a890fd9630"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明书",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28160"
+          ],
+          "状态": "已下载",
+          "文件": "京福顺馨/北京人寿京福顺馨养老年金保险产品说明书.pdf",
+          "字节": 354438,
+          "sha256": "5e1387ad2eac3b4cee8bdbb67d1bd876c9314e0a5a8844a699d1c5c0a26c8834"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京福颐享",
+      "官网产品名": "北京人寿京福颐享养老年金保险",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28627"
+          ],
+          "状态": "已下载",
+          "文件": "京福颐享/北京人寿京福颐享养老年金保险条款.pdf",
+          "字节": 373996,
+          "sha256": "08932177f3875fbc1ef5e475ddfbb6fdf1ba8ae75fd9c866d9c967e65d8c5d85"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28287"
+          ],
+          "状态": "已下载",
+          "文件": "京福颐享/北京人寿京福颐享养老年金保险费率表.pdf",
+          "字节": 53709,
+          "sha256": "80e7e30f00da1984d5fc40a2ea0bf735a1d281b179358fd3b92c95b470035e8f"
+        },
+        "现金价值表": {
+          "官网单元格": "现金价值表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28286"
+          ],
+          "状态": "已下载",
+          "文件": "京福颐享/北京人寿京福颐享养老年金保险现金价值表.xlsx",
+          "字节": 2981441,
+          "sha256": "bee12297c47cf932e0277aa7b69368c178ac2154c22c8292185c8fa57f258901"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明书",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28288"
+          ],
+          "状态": "已下载",
+          "文件": "京福颐享/北京人寿京福颐享养老年金保险产品说明书.pdf",
+          "字节": 222541,
+          "sha256": "df89409459d92ece41c1a862f76468642e9f0fdc4abfd4a6e643de914ef8ac0a"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京福颐嘉",
+      "官网产品名": "北京人寿京福颐嘉终身寿险",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28017"
+          ],
+          "状态": "已下载",
+          "文件": "京福颐嘉/北京人寿京福颐嘉终身寿险条款.pdf",
+          "字节": 649961,
+          "sha256": "d898e5de0031b75375b263733cd3ff3fb050f4db70e4df49e5f25e1ac4831206"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28018"
+          ],
+          "状态": "已下载",
+          "文件": "京福颐嘉/北京人寿京福颐嘉终身寿险费率表.pdf",
+          "字节": 71153,
+          "sha256": "14e2df2a3842796ea08de18c6c26b24766446d3333a617ea125cb3b9597e5869"
+        },
+        "现金价值表": {
+          "官网单元格": "现金价值表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28019"
+          ],
+          "状态": "已下载",
+          "文件": "京福颐嘉/北京人寿京福颐嘉终身寿险现金价值表.xlsx",
+          "字节": 2650706,
+          "sha256": "7342f4e7fb106e2bbdbf4b94c0bf6be904cc50f157f3e398ad76d34336c270f5"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明书",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28020"
+          ],
+          "状态": "已下载",
+          "文件": "京福颐嘉/北京人寿京福颐嘉终身寿险产品说明书.pdf",
+          "字节": 320404,
+          "sha256": "5d55db48e5b52eeda39d0864015c7158b350869a88b7ea9c4e855e717f25e7a7"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "京福颐年（满鑫欢禧）",
+      "官网产品名": "北京人寿京福颐年（满鑫欢禧）养老年金保险",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28053"
+          ],
+          "状态": "已下载",
+          "文件": "京福颐年（满鑫欢禧）/北京人寿京福颐年（满鑫欢禧）养老年金保险条款.pdf",
+          "字节": 460198,
+          "sha256": "158a4ae678deb94756251e56fec61c06c331e62c8631266ac9ec560fece2aedd"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28054"
+          ],
+          "状态": "已下载",
+          "文件": "京福颐年（满鑫欢禧）/北京人寿京福颐年（满鑫欢禧）养老年金保险费率表.pdf",
+          "字节": 288560,
+          "sha256": "fdad9a30fa4beb2be344a660aa2c800eb48976a8e4e7e315b5350b7d8446f33f"
+        },
+        "现金价值表": {
+          "官网单元格": "现金价值表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28055"
+          ],
+          "状态": "已下载",
+          "文件": "京福颐年（满鑫欢禧）/北京人寿京福颐年（满鑫欢禧）养老年金保险现金价值表.xlsx",
+          "字节": 11907199,
+          "sha256": "22751ba5f5c9e3c93d83d2cfdea98aa9759a55e4a36611fa3ed6a03ad57cfe72"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明书",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28056"
+          ],
+          "状态": "已下载",
+          "文件": "京福颐年（满鑫欢禧）/北京人寿京福颐年（满鑫欢禧）养老年金保险产品说明书.pdf",
+          "字节": 318636,
+          "sha256": "04dbb9d85bab45f70d384b4de6c54cb2f87eea33f024b6f609b74f85916fc634"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "住院意外伤害保险",
+      "官网产品名": "北京人寿住院意外伤害保险",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=26295",
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=26296"
+          ],
+          "状态": "已下载多个链接",
+          "文件明细": [
+            {
+              "文件": "住院意外伤害保险/北京人寿住院意外伤害保险条款.pdf",
+              "来源": "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=26295",
+              "字节": 689837,
+              "sha256": "443226a692b5c4bcd2580df4bd2b423cda046276500017941d4b57c480cccf6d"
+            },
+            {
+              "文件": "住院意外伤害保险/北京人寿住院意外伤害保险条款.pdf",
+              "来源": "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=26296",
+              "字节": 689837,
+              "sha256": "443226a692b5c4bcd2580df4bd2b423cda046276500017941d4b57c480cccf6d"
+            }
+          ]
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=26895"
+          ],
+          "状态": "已下载",
+          "文件": "住院意外伤害保险/北京人寿住院意外伤害保险费率表.pdf",
+          "字节": 113683,
+          "sha256": "41d711de025064e34938e978a781af70b2c06389d8be928e02c15eb3a1915104"
+        },
+        "现金价值表": {
+          "官网单元格": "",
+          "来源": [],
+          "状态": "官网未提供链接"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=27269"
+          ],
+          "状态": "已下载",
+          "文件": "住院意外伤害保险/北京人寿住院意外伤害保险产品说明书.pdf",
+          "字节": 187356,
+          "sha256": "b368aebbcaab31b446995f5d097f38e52136129638e1550d4bf1b3e1e1e88b19"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "爱她保",
+      "官网产品名": null,
+      "附件": {},
+      "匹配状态": "未匹配",
+      "候选": []
+    },
+    {
+      "目录": "附加住院医疗意外保险",
+      "官网产品名": "北京人寿附加住院医疗意外保险",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=26297"
+          ],
+          "状态": "已下载",
+          "文件": "附加住院医疗意外保险/北京人寿附加住院医疗意外保险条款.pdf",
+          "字节": 613381,
+          "sha256": "e6e9b43cb99bea527bf38785225d269955233427c96eda7a9f9eabd0d16fca55"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=26896"
+          ],
+          "状态": "已下载",
+          "文件": "附加住院医疗意外保险/北京人寿附加住院医疗意外保险费率表.pdf",
+          "字节": 180963,
+          "sha256": "c5015b3a27b88565976beb32ebf505091ff53c3044ec2f09a7ccbd7506938039"
+        },
+        "现金价值表": {
+          "官网单元格": "",
+          "来源": [],
+          "状态": "官网未提供链接"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=27270"
+          ],
+          "状态": "已下载",
+          "文件": "附加住院医疗意外保险/北京人寿附加住院医疗意外保险产品说明书.pdf",
+          "字节": 165978,
+          "sha256": "9d7db49fb55e93509b701f8a500a5c8092f249bfe23d098eb3b77bfad3754a18"
+        }
+      },
+      "匹配状态": "已匹配"
+    },
+    {
+      "目录": "附加投保人豁免保险费D款",
+      "官网产品名": "北京人寿附加投保人豁免保险费D款重大疾病保险",
+      "附件": {
+        "条款": {
+          "官网单元格": "查看",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28493"
+          ],
+          "状态": "已下载",
+          "文件": "附加投保人豁免保险费D款/北京人寿附加投保人豁免保险费D款重大疾病保险条款.pdf",
+          "字节": 1953393,
+          "sha256": "494c7d4577269cfafa794380fd9f4cf44c48a3129c0d70509c0d217289981c54"
+        },
+        "费率表": {
+          "官网单元格": "费率表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28494"
+          ],
+          "状态": "已下载",
+          "文件": "附加投保人豁免保险费D款/北京人寿附加投保人豁免保险费D款重大疾病保险费率表.pdf",
+          "字节": 60428,
+          "sha256": "19febfe4e0e3299b657f536f2ff9ad6caf6c6aeb2f49886adc3de7d4f6a216db"
+        },
+        "现金价值表": {
+          "官网单元格": "现金价值表",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28495"
+          ],
+          "状态": "已下载",
+          "文件": "附加投保人豁免保险费D款/北京人寿附加投保人豁免保险费D款重大疾病保险现金价值表.xlsx",
+          "字节": 157174,
+          "sha256": "dcd52474e4da49d60cec841715586c0ebb557bd408338d6ae40ba8b60748a1e4"
+        },
+        "产品说明书": {
+          "官网单元格": "产品说明书",
+          "来源": [
+            "https://www.beijinglife.com.cn/zcms/contentcore/resource/download?ID=28496"
+          ],
+          "状态": "已下载",
+          "文件": "附加投保人豁免保险费D款/北京人寿附加投保人豁免保险费D款重大疾病保险产品说明书.pdf",
+          "字节": 361207,
+          "sha256": "d6ddcf8986c36dd80cfb426e899ee1839fb2d077264b6bc11dcfd8f09aea0a2c"
+        }
+      },
+      "匹配状态": "已匹配"
+    }
+  ]
+}

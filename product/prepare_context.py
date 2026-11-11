@@ -61,9 +61,43 @@ def prepare(
         context = (
             "【来源上下文：由原件身份核实，不是新增保险约定】\n"
             f"产品全称：{product}\n原文件：{path.name}\n{location}\n"
-            "具体计划、责任及适用条件以以下原文为准；文件归属不等于所有计划均适用。\n"
-            "【原文开始】\n"
         )
+        parents = []
+        for parent in section.get("parent_spans", []):
+            a, b = parent["start"], parent["end"]
+            if (
+                type(a) is not int
+                or type(b) is not int
+                or not 0 <= a < b <= start
+                or not parent["anchor"]
+                or not source[a:b].startswith(parent["anchor"])
+            ):
+                raise ValueError(
+                    "Parent context is not a verified preceding source span"
+                )
+            context += (
+                f"【上级原文上下文：同文件Unicode码点{a}:{b}】\n"
+                + source[a:b]
+                + "\n【上级原文上下文结束】\n"
+            )
+            parents.append(
+                {
+                    "start": a,
+                    "end": b,
+                    "anchor": parent["anchor"],
+                    "physical_pages": [
+                        i + 1 for i, (x, y) in enumerate(pages) if x < b and y > a
+                    ]
+                    if path.suffix.lower() == ".pdf"
+                    else [],
+                }
+            )
+        scope = section.get("scope_quote")
+        if scope:
+            if scope not in body:
+                raise ValueError("Scope heading is not present in this source span")
+            context += "【本段原文责任标题】\n" + scope + "\n"
+        context += "【原文开始】\n"
         chunks.append(context + body + "\n【原文结束】")
         pieces.append(body)
         evidence.append(
@@ -74,6 +108,8 @@ def prepare(
                 "anchor": section["anchor"],
                 "physical_pages": page_ids if path.suffix.lower() == ".pdf" else [],
                 "source_text_sha256": hashlib.sha256(body.encode()).hexdigest(),
+                "parent_spans": parents,
+                "scope_quote": scope,
             }
         )
     if "".join(pieces) != source:

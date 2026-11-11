@@ -199,24 +199,27 @@ def import_batch(apply: bool) -> None:
             print(f"Accepted: {path.name}", flush=True)
 
 
-def main() -> None:
+def select_batch(batch: str) -> None:
     global OUTPUT, PID_FILE, MANIFEST, RECEIPTS, CONFIG_FILE
+    if not batch or any(
+        c not in "abcdefghijklmnopqrstuvwxyz0123456789_-" for c in batch
+    ):
+        raise ValueError("Invalid batch name")
+    OUTPUT = ROOT / "output" / batch
+    PID_FILE = OUTPUT / "server.pid"
+    MANIFEST = OUTPUT / "manifest.json"
+    RECEIPTS = OUTPUT / "uploads.json"
+    CONFIG_FILE = ROOT / ".env" if batch == "first3" else OUTPUT / "runtime.env"
+
+
+def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--batch", default="first3")
     parser.add_argument(
         "action", choices=["start", "status", "stop", "preview", "import"]
     )
     args = parser.parse_args()
-    if not args.batch or any(
-        c not in "abcdefghijklmnopqrstuvwxyz0123456789_-" for c in args.batch
-    ):
-        raise ValueError("Invalid batch name")
-    OUTPUT = ROOT / "output" / args.batch
-    PID_FILE = OUTPUT / "server.pid"
-    MANIFEST = OUTPUT / "manifest.json"
-    RECEIPTS = OUTPUT / "uploads.json"
-    if args.batch != "first3":
-        CONFIG_FILE = OUTPUT / "runtime.env"
+    select_batch(args.batch)
     actions = {
         "start": start,
         "status": status,

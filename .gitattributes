@@ -1,2 +1,5 @@
 lightrag/api/webui/** binary
 lightrag/api/webui/** linguist-generated
+
+# Preserve source document bytes, including Markdown hard line breaks.
+docs/insurance_docs/** -text -whitespace
