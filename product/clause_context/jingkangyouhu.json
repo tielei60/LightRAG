@@ -1,0 +1,167 @@
+{
+  "schema_version": 1,
+  "product": "北京人寿京康优护医疗保险",
+  "review_status": "source boundaries checked for this experiment; business evidence scopes remain unreviewed",
+  "max_chunk_tokens": 5000,
+  "documents": [
+    {
+      "path": "docs/insurance_docs/京康优护/北京人寿京康优护医疗保险条款.pdf",
+      "source_sha256": "144cff9c1e36b2358f6f077acc607d532577aaf8579fd730e09bc9d131f76515",
+      "extracted_text_sha256": "8384fc59f08f1bd0a00039a1a0b225f43cbcf6394dbe3ab3f97b8f8d137fdf63",
+      "sections": [
+        {
+          "start": 0,
+          "anchor": "附件2：           北京人寿保险股份有"
+        },
+        {
+          "start": 1827,
+          "anchor": "2． 本公司提供的保障             ",
+          "parent_spans": [
+            {
+              "start": 1358,
+              "end": 1464,
+              "anchor": "1 / 9\n北京人寿保险股份有限公司\n北京人寿京"
+            }
+          ]
+        },
+        {
+          "start": 2224,
+          "anchor": "2.5 保险责任 本合同的保险责任分为基本责任和",
+          "parent_spans": [
+            {
+              "start": 1358,
+              "end": 1464,
+              "anchor": "1 / 9\n北京人寿保险股份有限公司\n北京人寿京"
+            }
+          ]
+        },
+        {
+          "start": 3633,
+          "anchor": "2.6 责任免除 因下列情形之一，导致被保险人支",
+          "parent_spans": [
+            {
+              "start": 1358,
+              "end": 1464,
+              "anchor": "1 / 9\n北京人寿保险股份有限公司\n北京人寿京"
+            }
+          ]
+        },
+        {
+          "start": 4636,
+          "anchor": "3． 保险金的申请               ",
+          "parent_spans": [
+            {
+              "start": 1358,
+              "end": 1464,
+              "anchor": "1 / 9\n北京人寿保险股份有限公司\n北京人寿京"
+            }
+          ]
+        },
+        {
+          "start": 6432,
+          "anchor": "4． 保险费的支付               ",
+          "parent_spans": [
+            {
+              "start": 1358,
+              "end": 1464,
+              "anchor": "1 / 9\n北京人寿保险股份有限公司\n北京人寿京"
+            }
+          ]
+        },
+        {
+          "start": 6873,
+          "anchor": "6． 其他需要关注的事项            ",
+          "parent_spans": [
+            {
+              "start": 1358,
+              "end": 1464,
+              "anchor": "1 / 9\n北京人寿保险股份有限公司\n北京人寿京"
+            }
+          ]
+        },
+        {
+          "start": 7836,
+          "anchor": "6.4 职业或工种的\n确定与变更\n在本合同保险期",
+          "parent_spans": [
+            {
+              "start": 1358,
+              "end": 1464,
+              "anchor": "1 / 9\n北京人寿保险股份有限公司\n北京人寿京"
+            }
+          ]
+        },
+        {
+          "start": 8728,
+          "anchor": "7． 释义                   ",
+          "parent_spans": [
+            {
+              "start": 1358,
+              "end": 1464,
+              "anchor": "1 / 9\n北京人寿保险股份有限公司\n北京人寿京"
+            }
+          ]
+        },
+        {
+          "start": 10000,
+          "anchor": "7.7 城 乡 居 民 大 病\n保险\n城乡居民大",
+          "parent_spans": [
+            {
+              "start": 1358,
+              "end": 1464,
+              "anchor": "1 / 9\n北京人寿保险股份有限公司\n北京人寿京"
+            },
+            {
+              "start": 8728,
+              "end": 8817,
+              "anchor": "7． 释义                   "
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "docs/insurance_docs/京康优护/北京人寿京康优护医疗保险产品说明书.pdf",
+      "source_sha256": "81992a93b380a2b59edaaee811574b63f66650e7e0382614d0950db8ccff7cfe",
+      "extracted_text_sha256": "7bd9ac21eed3a7addc30bfaf21410c7a380a0a7f369c160e16360dcd4e10db2b",
+      "sections": [
+        {
+          "start": 0,
+          "anchor": "1 / 7\n北京人寿保险股份有限公司\n北京人寿京"
+        },
+        {
+          "start": 1503,
+          "anchor": "（二） 责任免除\n因下列情形之一，导致被保险人支",
+          "parent_spans": [
+            {
+              "start": 0,
+              "end": 105,
+              "anchor": "1 / 7\n北京人寿保险股份有限公司\n北京人寿京"
+            }
+          ]
+        },
+        {
+          "start": 2409,
+          "anchor": "（三） 投保范围\n凡出生 28 日以上（含 28",
+          "parent_spans": [
+            {
+              "start": 0,
+              "end": 105,
+              "anchor": "1 / 7\n北京人寿保险股份有限公司\n北京人寿京"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "docs/insurance_docs/京康优护/京康优护医疗保险投保及核保规则.md",
+      "source_sha256": "14eabb6e2701456771525e0d957d0e40b6d0f70ae7c6d17af4b87372ec1c312f",
+      "extracted_text_sha256": "14eabb6e2701456771525e0d957d0e40b6d0f70ae7c6d17af4b87372ec1c312f",
+      "sections": [
+        {
+          "start": 0,
+          "anchor": "# 北京人寿京康优护医疗保险投保及核保规则\n\n#"
+        }
+      ]
+    }
+  ]
+}
