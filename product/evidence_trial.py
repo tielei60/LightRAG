@@ -16,13 +16,14 @@ import re
 import tempfile
 import time
 import uuid
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError
 from urllib.parse import urlsplit
 from urllib.request import HTTPRedirectHandler, Request, build_opener
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 ID = re.compile(r"[A-Za-z0-9_.:-]{1,100}\Z")
 LIMITATIONS = [
     "External experiment only; native query/upload/UI behavior is unchanged.",
@@ -47,7 +48,7 @@ def read_json(path: Path) -> dict:
     return value
 
 
-def write_json(path: Path, value: dict) -> None:
+def write_json(path: Path, value: dict, *, expected_run_id: str | None = None) -> None:
     """Publish a complete artifact atomically with owner-only permissions."""
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, temporary = tempfile.mkstemp(prefix=".evidence-", dir=path.parent)
@@ -57,10 +58,74 @@ def write_json(path: Path, value: dict) -> None:
             stream.write("\n")
             stream.flush()
             os.fsync(stream.fileno())
+        if expected_run_id is not None:
+            if read_json(path).get("run_id") != expected_run_id:
+                raise RuntimeError(
+                    "Output ownership changed; refusing to replace another run"
+                )
         os.replace(temporary, path)
     finally:
         if os.path.exists(temporary):
             os.unlink(temporary)
+
+
+@contextmanager
+def reserve_output(path: Path):
+    """Reserve output before work/network; keep a durable audit and own the lock.
+
+    O_EXCL, not an exists-then-write check, rejects concurrent runs. A hard crash
+    deliberately leaves its lock and audit for inspection; never infer that a
+    provider call did not execute merely because a process disappeared.
+    """
+    path.parent.mkdir(parents=True, exist_ok=True)
+    run_id = str(uuid.uuid4())
+    lock = path.with_name(f".{path.name}.lock")
+    descriptor = os.open(lock, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+    identity = os.fstat(descriptor)
+    try:
+        os.write(descriptor, run_id.encode())
+        os.fsync(descriptor)
+        output_descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        with os.fdopen(output_descriptor, "w", encoding="utf-8") as stream:
+            json.dump(
+                {
+                    "schema_version": SCHEMA_VERSION,
+                    "run_id": run_id,
+                    "status": "reserved",
+                },
+                stream,
+            )
+            stream.flush()
+            os.fsync(stream.fileno())
+        try:
+            yield run_id
+        except BaseException as exc:
+            # A still-reserved file means no network request has started. Do
+            # not overwrite richer sending/completed/unknown stage evidence.
+            try:
+                current = read_json(path)
+                if (
+                    current.get("run_id") == run_id
+                    and current.get("status") == "reserved"
+                ):
+                    current.update(
+                        status="failed_before_request", error_type=type(exc).__name__
+                    )
+                    write_json(path, current, expected_run_id=run_id)
+            except (OSError, ValueError):
+                pass
+            raise
+    finally:
+        os.close(descriptor)
+        try:
+            current_identity = lock.stat(follow_symlinks=False)
+            if (current_identity.st_dev, current_identity.st_ino) == (
+                identity.st_dev,
+                identity.st_ino,
+            ) and lock.read_text(encoding="utf-8") == run_id:
+                lock.unlink()
+        except FileNotFoundError:
+            pass
 
 
 def label(value: Any, name: str) -> str:
@@ -77,6 +142,13 @@ def label(value: Any, name: str) -> str:
 def integer(value: Any, name: str, lower: int, upper: int) -> int:
     if type(value) is not int or not lower <= value <= upper:
         raise ValueError(f"Invalid {name}: expected {lower}..{upper}")
+    return value
+
+
+def reviewed_hash(value: Any, name: str) -> str:
+    """Require an existing review digest; never manufacture the expected value."""
+    if not isinstance(value, str) or not re.fullmatch(r"[a-f0-9]{64}", value):
+        raise ValueError(f"Missing or invalid reviewed {name}")
     return value
 
 
@@ -107,6 +179,8 @@ def validate_catalog(catalog: dict) -> None:
         ref = label(doc.get("document_ref"), "document_ref")
         path = label(doc.get("file_path"), "file_path")
         label(doc.get("product_ref"), "product_ref")
+        reviewed_hash(doc.get("source_sha256"), "source SHA-256")
+        reviewed_hash(doc.get("extracted_text_sha256"), "extracted-text SHA-256")
         if ref in refs or path in paths:
             raise ValueError("Ambiguous document reference or native file_path")
         refs.add(ref)
@@ -198,15 +272,32 @@ def prepare(manifest_path: Path) -> dict:
         if source_sha != item.get("source_sha256"):
             raise ValueError(f"Original source changed: {item.get('document_ref')}")
         text, pages = extract_source(source)
+        expected_text_hash = reviewed_hash(
+            item.get("extracted_text_sha256"), "extracted-text SHA-256"
+        )
+        if hashlib.sha256(text.encode()).hexdigest() != expected_text_hash:
+            raise ValueError(
+                f"Reviewed extracted text changed: {item.get('document_ref')}"
+            )
         doc = {key: item[key] for key in ("document_ref", "product_ref", "file_path")}
         doc.update(
             source_sha256=source_sha,
-            extracted_text_sha256=hashlib.sha256(text.encode()).hexdigest(),
+            extracted_text_sha256=expected_text_hash,
             units=[],
         )
         for item_unit in item.get("units", []):
             start = integer(item_unit.get("start"), "start", 0, len(text) - 1)
             end = integer(item_unit.get("end"), "end", start + 1, len(text))
+            expected_span_hash = reviewed_hash(
+                item_unit.get("text_sha256"), "evidence-span SHA-256"
+            )
+            if (
+                hashlib.sha256(text[start:end].encode()).hexdigest()
+                != expected_span_hash
+            ):
+                raise ValueError(
+                    f"Reviewed evidence span changed: {item_unit.get('id')}"
+                )
             anchors = item_unit.get("anchors", [])
             if any(not isinstance(a, str) or text.count(a) != 1 for a in anchors):
                 raise ValueError(
@@ -227,7 +318,7 @@ def prepare(manifest_path: Path) -> dict:
                 if source.suffix.lower() == ".pdf"
                 else [],
             )
-            unit["text_sha256"] = hashlib.sha256(unit["text"].encode()).hexdigest()
+            unit["text_sha256"] = expected_span_hash
             doc["units"].append(unit)
         documents.append(doc)
     result = {
@@ -708,19 +799,28 @@ def main(argv: list[str] | None = None) -> None:
                 help="Explicitly send allowed source text to the configured provider (may be remote/paid); one call per arm",
             )
     args = parser.parse_args(argv)
-    if args.output.exists():
+    if args.command == "live" and not args.allow_network:
+        parser.error("live requires --allow-network; query/data can make model calls")
+    try:
+        with reserve_output(args.output) as run_id:
+            execute(args, run_id)
+    except FileExistsError:
         parser.error(
-            "Output exists; choose a new run filename to preserve previous evidence"
+            "Output exists or is reserved by another run; choose a new filename and inspect any unfinished run"
         )
+
+
+def execute(args: argparse.Namespace, run_id: str) -> None:
+    def save(value: dict) -> None:
+        if args.command != "prepare":
+            value["run_id"] = run_id
+        write_json(args.output, value, expected_run_id=run_id)
+
     if args.command == "prepare":
         value = prepare(args.manifest)
     else:
         catalog, case = read_json(args.catalog), read_json(args.case)
         if args.command == "live":
-            if not args.allow_network:
-                parser.error(
-                    "live requires --allow-network; query/data can make model calls"
-                )
             # Validate inputs before contacting any endpoint.
             assemble(catalog, {"status": "success", "data": {"chunks": []}}, case)
             integer(args.timeout, "timeout", 1, 1800)
@@ -740,7 +840,7 @@ def main(argv: list[str] | None = None) -> None:
             }
             pending = {
                 "schema_version": SCHEMA_VERSION,
-                "run_id": str(uuid.uuid4()),
+                "run_id": run_id,
                 "created_at_utc": datetime.datetime.now(
                     datetime.timezone.utc
                 ).isoformat(),
@@ -751,7 +851,7 @@ def main(argv: list[str] | None = None) -> None:
                 "answers": {},
                 "limitations": LIMITATIONS,
             }
-            write_json(args.output, pending)
+            save(pending)
             started = time.perf_counter()
             try:
                 retrieval = post_json(
@@ -767,7 +867,7 @@ def main(argv: list[str] | None = None) -> None:
                     error_type=type(exc).__name__,
                     seconds=time.perf_counter() - started,
                 )
-                write_json(args.output, pending)
+                save(pending)
                 raise RuntimeError(
                     "Retrieval failed or outcome unknown; inspect saved run before retrying"
                 ) from None
@@ -776,7 +876,7 @@ def main(argv: list[str] | None = None) -> None:
             pending["retrieval_stage"].update(
                 status="completed", seconds=retrieval_seconds
             )
-            write_json(args.output, pending)
+            save(pending)
         else:
             retrieval = read_json(args.retrieval)
         try:
@@ -787,7 +887,7 @@ def main(argv: list[str] | None = None) -> None:
                     "status": "failed",
                     "error_type": type(exc).__name__,
                 }
-                write_json(args.output, pending)
+                save(pending)
             raise
         if args.command == "live":
             value["run_id"] = pending["run_id"]
@@ -809,7 +909,7 @@ def main(argv: list[str] | None = None) -> None:
                 "blocked" if value["candidate"]["status"] != "ready" else args.generate
             )
             # Persist the exact prompts and retrieved data before any paid generation.
-            write_json(args.output, value)
+            save(value)
             if value["candidate"]["status"] == "ready" and args.generate != "none":
                 try:
                     configuration, _ = provider_configuration()
@@ -818,7 +918,7 @@ def main(argv: list[str] | None = None) -> None:
                         "status": "configuration_error",
                         "error_type": type(exc).__name__,
                     }
-                    write_json(args.output, value)
+                    save(value)
                     raise
                 value["query_provider_configuration"] = configuration
                 for arm in (
@@ -831,7 +931,7 @@ def main(argv: list[str] | None = None) -> None:
                         "question": case["question"],
                         "system_prompt": value["prompts"][arm],
                     }
-                    write_json(args.output, value)
+                    save(value)
                     try:
                         answer = generate(
                             value["prompts"][arm], case["question"], args.timeout
@@ -856,16 +956,16 @@ def main(argv: list[str] | None = None) -> None:
                             "status": "error_or_unknown",
                             "error_type": type(exc).__name__,
                         }
-                        write_json(args.output, value)
+                        save(value)
                         raise RuntimeError(
                             "Generation failed or outcome unknown; inspect saved run, do not automatically retry"
                         ) from None
-                    write_json(args.output, value)
+                    save(value)
                 value["generation_stage"] = {
                     "status": "completed",
                     "arms": list(value["answers"]),
                 }
-    write_json(args.output, value)
+    save(value)
     summary = value.get("candidate", {})
     print(
         json.dumps(

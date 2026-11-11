@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "source_root": ".",
   "documents": [
     {
@@ -21,7 +21,8 @@
           "scope": [
             {}
           ],
-          "requires": []
+          "requires": [],
+          "text_sha256": "dc154e6836f2df9a37e2f33b737bdde45d77be54aa05a7dcb24c1bfe230a27c6"
         },
         {
           "id": "synthetic:paired",
@@ -44,9 +45,11 @@
           ],
           "requires": [
             "synthetic:common"
-          ]
+          ],
+          "text_sha256": "6ae2aa71fefa93d79eb2c38240e72ed9c374170a688992d0d61ac0b50211de2b"
         }
-      ]
+      ],
+      "extracted_text_sha256": "890424ac26a7dfda0f0e0c02530b20874e8148f8a01bec54470305c21ef76d7b"
     }
   ]
 }

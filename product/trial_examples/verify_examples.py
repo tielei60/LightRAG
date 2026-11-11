@@ -15,6 +15,7 @@ def main() -> None:
     for directory in ("synthetic", "jingkangyouhu"):
         path = base / directory / "manifest.json"
         manifest = json.loads(path.read_text(encoding="utf-8"))
+        assert manifest["schema_version"] == 2
         audit = json.loads(
             path.with_name("verification.json").read_text(encoding="utf-8")
         )
@@ -31,6 +32,7 @@ def main() -> None:
             assert (
                 hashlib.sha256(text.encode()).hexdigest()
                 == audit["extracted_text_sha256"]
+                == document["extracted_text_sha256"]
             )
             for unit in document["units"]:
                 assert 0 <= unit["start"] < unit["end"] <= len(text)
@@ -42,6 +44,7 @@ def main() -> None:
                 assert (
                     hashlib.sha256(quote.encode()).hexdigest()
                     == expected["span_text_sha256"]
+                    == unit["text_sha256"]
                 )
                 assert quote.startswith(expected["start_boundary"])
                 assert text[unit["end"] :].startswith(expected["next_boundary"])

@@ -23,7 +23,7 @@ def prepared(tmp_path):
     rule_start = text.index("Benefit")
     other_start = text.index("Other")
     manifest = {
-        "schema_version": 1,
+        "schema_version": trial.SCHEMA_VERSION,
         "documents": [
             {
                 "document_ref": "existing-doc",
@@ -69,6 +69,13 @@ def prepared(tmp_path):
             }
         ],
     }
+    manifest["documents"][0]["extracted_text_sha256"] = hashlib.sha256(
+        text.encode()
+    ).hexdigest()
+    for unit in manifest["documents"][0]["units"]:
+        unit["text_sha256"] = hashlib.sha256(
+            text[unit["start"] : unit["end"]].encode()
+        ).hexdigest()
     manifest_path = tmp_path / "manifest.json"
     manifest_path.write_text(json.dumps(manifest))
     catalog = trial.prepare(manifest_path)
@@ -621,3 +628,198 @@ def test_trace_identity_is_validated_before_network(
     )
     with pytest.raises(ValueError):
         trial.main(args)
+
+
+def test_same_original_parser_drift_is_rejected(prepared, monkeypatch):
+    from product import prepare_context
+
+    manifest_path, _, _, _ = prepared
+    original = prepare_context.extract_source
+    source = manifest_path.parent / "source.md"
+    unchanged_bytes = source.read_bytes()
+
+    def shifted(path):
+        text, _ = original(path)
+        # Original bytes are unchanged; only the parser output shifts offsets.
+        return " " + text, [(0, len(text) + 1)]
+
+    monkeypatch.setattr(prepare_context, "extract_source", shifted)
+    with pytest.raises(ValueError, match="Reviewed extracted text changed"):
+        trial.prepare(manifest_path)
+    assert source.read_bytes() == unchanged_bytes
+
+
+def test_reviewed_offsets_cannot_shift_within_unchanged_text(prepared):
+    manifest_path, _, _, _ = prepared
+    manifest = trial.read_json(manifest_path)
+    unit = manifest["documents"][0]["units"][1]
+    unit["start"] -= 1
+    unit["end"] -= 1
+    manifest_path.write_text(json.dumps(manifest))
+    with pytest.raises(ValueError, match="Reviewed evidence span changed"):
+        trial.prepare(manifest_path)
+
+
+@pytest.mark.parametrize("field", ["extracted_text_sha256", "text_sha256"])
+@pytest.mark.parametrize("value", [None, "", "invalid", "0" * 64])
+def test_review_digests_are_mandatory_and_never_recomputed(prepared, field, value):
+    manifest_path, _, _, _ = prepared
+    manifest = trial.read_json(manifest_path)
+    target = manifest["documents"][0]
+    if field == "text_sha256":
+        target = target["units"][0]
+    if value is None:
+        target.pop(field)
+    else:
+        target[field] = value
+    manifest_path.write_text(json.dumps(manifest))
+    with pytest.raises(ValueError, match="reviewed|Reviewed"):
+        trial.prepare(manifest_path)
+    assert trial.read_json(manifest_path) == manifest
+
+
+def test_schema_one_catalog_and_manifest_are_not_silently_reused(prepared):
+    manifest_path, catalog, _, _ = prepared
+    manifest = trial.read_json(manifest_path)
+    manifest["schema_version"] = 1
+    manifest_path.write_text(json.dumps(manifest))
+    with pytest.raises(ValueError, match="Unsupported manifest"):
+        trial.prepare(manifest_path)
+    catalog["schema_version"] = 1
+    resign(catalog)
+    with pytest.raises(ValueError, match="Unsupported catalog"):
+        trial.validate_catalog(catalog)
+
+
+def test_existing_output_bytes_and_permissions_are_untouched(prepared, tmp_path):
+    args, output = live_args(prepared, tmp_path)
+    output.write_bytes(b"Existing unrelated audit; do not modify")
+    output.chmod(0o640)
+    before = output.read_bytes()
+    with pytest.raises(SystemExit):
+        trial.main(args)
+    assert output.read_bytes() == before
+    assert stat.S_IMODE(output.stat().st_mode) == 0o640
+    assert not output.with_name(f".{output.name}.lock").exists()
+
+
+def test_parallel_live_reserves_before_catalog_read_or_provider_call(
+    prepared, tmp_path, monkeypatch
+):
+    import threading
+
+    _, _, _, data = prepared
+    args, output = live_args(prepared, tmp_path)
+    first_read = threading.Event()
+    release = threading.Event()
+    outcomes, calls = [], []
+    original_read = trial.read_json
+    catalog_path = tmp_path / "catalog.json"
+
+    def delayed_read(path):
+        if path == catalog_path and threading.current_thread().name == "first-run":
+            first_read.set()
+            assert release.wait(5)
+        return original_read(path)
+
+    monkeypatch.setattr(trial, "read_json", delayed_read)
+    monkeypatch.setattr(
+        trial, "post_json", lambda *a, **k: calls.append("provider") or data
+    )
+
+    def first_run():
+        try:
+            trial.main(args)
+            outcomes.append("completed")
+        except BaseException as exc:
+            outcomes.append(exc)
+
+    first = threading.Thread(target=first_run, name="first-run")
+    first.start()
+    try:
+        assert first_read.wait(5)
+        # This is the former exists-before-first-write race window.
+        with pytest.raises(SystemExit):
+            trial.main(args)
+        assert calls == []
+    finally:
+        release.set()
+        first.join(5)
+    assert not first.is_alive()
+    assert outcomes == ["completed"]
+    assert calls == ["provider"]
+    assert trial.read_json(output)["retrieval_stage"]["status"] == "completed"
+    assert not output.with_name(f".{output.name}.lock").exists()
+
+
+def test_two_processes_cannot_publish_same_catalog(prepared, tmp_path):
+    import subprocess
+    import sys
+    from pathlib import Path
+
+    manifest_path, _, _, _ = prepared
+    output = tmp_path / "simultaneous.json"
+    command = [
+        sys.executable,
+        "-m",
+        "product.evidence_trial",
+        "prepare",
+        "--manifest",
+        str(manifest_path),
+        "--output",
+        str(output),
+    ]
+    root = Path(__file__).resolve().parents[2]
+    processes = [
+        subprocess.Popen(
+            command, cwd=root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+        )
+        for _ in range(2)
+    ]
+    for process in processes:
+        process.communicate(timeout=20)
+    assert sorted(process.returncode for process in processes) == [0, 2]
+    trial.validate_catalog(trial.read_json(output))
+    assert not output.with_name(f".{output.name}.lock").exists()
+
+
+def test_output_run_id_change_blocks_replace_and_cleans_temp(tmp_path):
+    output = tmp_path / "run.json"
+    with trial.reserve_output(output) as run_id:
+        changed = {"run_id": "different-owner", "audit": "must survive"}
+        output.write_text(json.dumps(changed))
+        with pytest.raises(RuntimeError, match="ownership changed"):
+            trial.write_json(
+                output, {"run_id": run_id, "audit": "old"}, expected_run_id=run_id
+            )
+        assert trial.read_json(output) == changed
+        assert not list(tmp_path.glob(".evidence-*"))
+    assert not output.with_name(f".{output.name}.lock").exists()
+
+
+def test_failed_live_releases_lock_but_preserves_audit(prepared, tmp_path, monkeypatch):
+    args, output = live_args(prepared, tmp_path)
+
+    def fail(*a, **kw):
+        raise TimeoutError()
+
+    monkeypatch.setattr(trial, "post_json", fail)
+    with pytest.raises(RuntimeError, match="outcome unknown"):
+        trial.main(args)
+    record = trial.read_json(output)
+    assert record["retrieval_stage"]["status"] == "error_or_unknown"
+    assert not output.with_name(f".{output.name}.lock").exists()
+    with pytest.raises(SystemExit):
+        trial.main(args)
+    assert trial.read_json(output) == record
+
+
+def test_failure_before_request_preserves_reason_and_releases_lock(prepared, tmp_path):
+    args, output = live_args(prepared, tmp_path)
+    (tmp_path / "catalog.json").write_text("invalid json")
+    with pytest.raises(ValueError):
+        trial.main(args)
+    record = trial.read_json(output)
+    assert record["status"] == "failed_before_request"
+    assert record["error_type"] == "JSONDecodeError"
+    assert not output.with_name(f".{output.name}.lock").exists()

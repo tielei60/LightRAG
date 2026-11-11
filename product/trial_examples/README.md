@@ -9,6 +9,12 @@ with its pinned `pypdf` dependency:
 python -m product.trial_examples.verify_examples
 ```
 
+Schema 2 requires reviewed `extracted_text_sha256` on each document and reviewed
+`text_sha256` on every unit. Prepare compares both before copying any evidence;
+missing digests, parser drift and stale spans fail closed. These values come
+from the existing verification records, not freshly generated expected values.
+Schema 1 manifests/catalogs must not be silently reused.
+
 The verifier checks original file SHA-256, unmodified extracted-text SHA-256,
 Unicode `[start, end)` spans, per-span SHA-256, exact unique anchors, boundary
 strings and dependency IDs. PDF extraction uses
