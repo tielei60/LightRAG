@@ -68,6 +68,16 @@ class CaptureTests(unittest.IsolatedAsyncioTestCase):
 
         async def provider(prompt, **kwargs):
             calls.append((prompt, kwargs))
+            if not kwargs.get("stream"):
+                return json.dumps(
+                    {
+                        "supported": True,
+                        "scope_consistent": True,
+                        "formula_consistent": True,
+                        "issues": [],
+                        "corrected_answer": None,
+                    }
+                )
 
             async def generated():
                 yield "这种情形不能退款，"
@@ -115,7 +125,7 @@ class CaptureTests(unittest.IsolatedAsyncioTestCase):
                     "原文明确不退还现金价值",
                     json.dumps(model_documents, ensure_ascii=False),
                 )
-                self.assertEqual(saved["calls"][0]["prompt"], calls[-1][0])
+                self.assertEqual(saved["calls"][0]["prompt"], calls[-2][0])
                 self.assertTrue(saved["calls"][0]["stream"])
                 self.assertEqual(saved["calls"][0]["state"], "completed")
                 self.assertEqual(
@@ -130,8 +140,8 @@ class CaptureTests(unittest.IsolatedAsyncioTestCase):
                 self.assertNotIn("source_units", model_documents)
                 self.assertNotIn("U0001", saved["calls"][0]["prompt"])
                 self.assertNotIn("unit_ids", saved["calls"][0]["response_text"])
-                self.assertNotIn("response_format", calls[-1][1])
-            self.assertEqual(len(calls), 2)
+                self.assertNotIn("response_format", calls[-2][1])
+            self.assertEqual(len(calls), 4)
 
     async def test_capture_does_not_claim_iterator_is_completed_before_consumption(
         self,

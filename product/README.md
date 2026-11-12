@@ -4,7 +4,63 @@
 
 本次以 `docs/方案/lightrag_157_import_design_v1.md` 的导入专项为范围，暂不实现整体方案中的平台接入、在线补证与自定义问答 API。
 
-## 新增两款候选：京富守护星、京富添利
+## 当前数据库 master 工作区
+
+默认服务和新增产品统一使用 **`master`**，只有明确需要隔离测试时才指定其他工作区。启动配置为 `output/master/runtime.env`，根 `.env` 使用相同配置；`make -f product/Makefile start/status/stop/verify` 默认管理此入口。问答 <http://127.0.0.1:9623/workspace/>，文档及图谱 <http://127.0.0.1:9623/webui/>。
+
+存储已切为原生 `Neo4JStorage` + `PGKVStorage` / `PGVectorStorage` / `PGDocStatusStorage`。Neo4j 存图谱，Homebrew PostgreSQL17.11 + pgvector0.8.6 存正文、片段、三类向量、状态、抽取/摘要缓存、来源追踪及恢复记录；原件、解析产物、批次及冻结提示留在资料目录。PostgreSQL17使用5433，原PostgreSQL14的5432和数据保留；Neo4j密码已按用户授权重置并恢复认证，凭据只在忽略文件中保存。
+
+初始数据库批次 `database-master-initial` 已将5产品、15文档、412片段、497实体、646关系完整重导至 `master`。412个已核选择在回放前全部重新验证，未重新调用抽取模型；独立核对缓存466条（412抽取、54摘要）、恢复锚点和来源追踪与旧文件库一致。累计登记改为 `output/workspaces/master/registry.json`，以后使用 `--append` 继续向数据库master追加。旧文件库和原批次保持历史对照，不作为默认运行数据。
+
+后续追加批次 `master-product-6` 已将**京福宏裕（尊享版）终身寿险（分红型）**写入同一数据库master：新增条款、说明书、投核保规则3份资料、82个完整片段。累计为**6产品、18文档、494片段、597实体、754关系**，全库正文/图谱/三类向量及旧5款文档、片段、恢复锚点和来源追踪保留校验通过；提示和批次记录独立保存，模型仍为qwen3.7-plus且关闭思考。入库回执及数据库写前/写后核验产物位于 `output/master-product-6/`，工作区未新建。
+
+第6款的独立技术核验60项通过，旧466缓存逐行保留，累计561缓存（494抽取、67摘要）。6道新产品题及2道旧产品题的8个核心结论通过，全部最终答案与实际模型释放记录一致；仍保留4题精度/完整性备注，尤其旧优护回答有无来源的100%例子及赔付上限省略，不能作为完整理赔公式或全文零瑕疵。每题仅一次，完整回答中位11.682秒，不推断通用准确率或稳定速度。报告为该批 `technical-acceptance.json`、`business-review.json`，汇总 `import-summary.json`。
+
+本轮数据库验收为46项导出对照、26项独立SQL/Neo4j只读核验全通过；PostgreSQL原生备份已实际恢复到临时数据库验证，测试库随后删除。相关离线回归763项、Ruff通过。6题真实HTTP的核心结论均通过并完成交付，仍保留3题精度备注，尤其优护回答出现无同次原文依据的“如100%”“通常高于60%”附加话术；单次小样本不代表通用准确率，也不能将问答改善归因于更换存储。报告为 `output/database-migration/migration-acceptance.json`、`business-review.json`，总记录为 `migration-summary.json`。
+
+数据库安装、数据分布、增量命令、备份及上线恢复说明见 [DATABASE.md](DATABASE.md)，无凭据的字段示例为 [database.env.example](database.env.example)。本次已在同一停写窗口生成PG custom dump、Neo4j原生dump及不含凭据的产品资料归档，位于 `output/database-migration/native-backup/`。数据库核验导出的JSON/GraphML只用于验收和备份，不是运行存储。
+
+日常追加示例（省略 `--workspace` 即使用master）：
+
+```sh
+.venv/bin/python -m product.prepare_batch --batch NEW_BATCH --products 产品目录 --config output/master/runtime.env --append
+make -f product/Makefile BATCH=NEW_BATCH append-preview
+make -f product/Makefile stop
+make -f product/Makefile BATCH=NEW_BATCH append-import
+make -f product/Makefile verify
+make -f product/Makefile start
+```
+
+## 历史：文件工作区与增量导入
+
+**LightRAG 支持在原工作区增量插入资料，新产品不需要新建工作区。** 此前每轮候选新建工作区是专项工具保留对照的约束，现已在 `product/` 增加显式增量入口。后续固定使用 `products_two_v5`，服务仍由 `two-products-v5` 管理：问答 <http://127.0.0.1:9623/workspace/>，文档及图谱 <http://127.0.0.1:9623/webui/>。批次目录用于保存每次导入清单、证据选择和报告；多个批次写入同一工作区。
+
+本次将 `next-two-products-v2` 的京富守护星、京富添利通过 SDK 追加到原有京康优护、京安泰工作区，四款合并记录为 `merge-four-products`；复用并重新校验158个已核证据选择，没有重新调用抽取模型。合并后12文档、329片段、388实体、487关系及三类向量均通过全库读回，原有文档、片段、恢复锚点保持原值，旧图来源归属保留。随后 `incremental-product-5` 将京安心的3份资料追加到同一工作区，未重建前四款；最终5产品、15文档、412片段、497实体、646关系及向量读回全部通过。
+
+工作区累计登记为 `output/workspaces/products_two_v5/registry.json`。`verify` 根据登记检查所有已完成批次，累计结果保存为 `workspace-readback-report.json`，保留单批旧报告。写入前取得工作区写锁、检查同库服务已停、完整备份原存储；启动服务使用同一个互斥锁，防止导入期间误启同库服务。只有新旧证据、图谱、向量和原数据保留校验全部通过，才登记新批次。批次失败时保留原回执、`append-journal.json` 和 `backups/before-append`，检查原因后处理，不能删除回执盲目重放。另一个旧工作区及历史报告保留作溯源，旧9624服务已停，日常统一测试9623。根 `.env` 与固定服务配置也已指向同一工作区，凭据文件及备份均保持权限600。
+
+后续新增产品在仓库根目录执行以下流程；`NEW_BATCH` 每次不同，`products_two_v5` 保持不变，产品目录名取自知识资料目录：
+
+```sh
+.venv/bin/python -m product.prepare_batch --batch NEW_BATCH --workspace products_two_v5 --products 产品目录 --config output/two-products-v5/runtime.env --append
+make -f product/Makefile BATCH=NEW_BATCH append-preview
+make -f product/Makefile stop
+make -f product/Makefile BATCH=NEW_BATCH append-import
+make -f product/Makefile verify
+make -f product/Makefile start
+```
+
+准备时继承固定工作区的模型、向量维度、端口和检索预算；抽取提示需在新批次冻结并让其 `PROMPT_DIR` 指向副本。同名产品、规范化文件名、已入库文档或片段重复会在写入前拒绝，向量模型/绑定/维度必须一致。首次将已有但未登记的库用于增量时，另传 `BASE_BATCH=原入库批次`，登记成功后无需重复指定。本入口用于**新增产品**，已有产品的修订替换仍需单独设计更新及删除旧贡献流程，不能把重复资料当新增产品写入。
+
+本轮验证沿用用户修复后的 `audited-source-answer-v5`，关闭思考；草稿和审核日志独立保留，公开答案等待审核后整体交付。问答验收按真实最终文本与同次原文独立评审，模型审核自评通过不代替业务正确性。
+
+两阶段各题只测一次，共17次HTTP请求。四款阶段8题中6题核心通过、1题等待期解释错误、1题审核schema不合格未交付；五款阶段9题中5题核心通过、1题京安心期满延续被误归到京安泰、3题因审核或引用协议失败未交付。五款的3次失败分别为计划表题返回schema而非审核实例、跨产品身故题二审仍拒绝、费用基数题修正文没有引用。没有把草稿或中间正确修订当成最终通过，也没有将两轮拼成一轮通过。当前累计入库和原有数据保留验收通过，问答业务验收未通过；入口为 `output/incremental-product-5/business-review.json`，阶段报告为 `output/merge-four-products/four-product-business-review.json`、`output/incremental-product-5/five-product-business-review.json`。
+
+本轮增量相关改动集中在 `product/`，未改写用户的关键词兜底、计划范围及事实审核源码。离线回归 `product/`、`tests/extraction/` 共724项通过，Ruff通过；测试进程中清空提示文件环境项以隔离根 `.env`，不改变服务配置。
+
+以下分批结果保留各自当时的模型、端口和验收事实，当前累计产品和固定入口以上节为准。
+
+## 历史：新增两款候选京富守护星、京富添利
 
 2026-11-12 在提交已有成果 `a83f89c17` 后，新增导入京富守护星年金保险、京富添利终身寿险（万能型）。有效批次为 `next-two-products-v2`、工作区 `products_next_two_v2`；问答入口 <http://127.0.0.1:9624/workspace/>，文档及图谱 <http://127.0.0.1:9624/webui/>。两款各有条款、产品说明书及投核保规则，共6份原件、158个完整片段；185个实体、193条关系及三类向量数量、内容和来源读回通过。抽取实际166次调用（含8次校验后纠正），未导入独立费率或现金价值表文件。
 
@@ -24,7 +80,7 @@ make -f product/Makefile BATCH=next-two-products-v2 stop
 
 `make qa` 的内置用例仅适用于京康优护、京安泰，不能用来验收这两款新产品。本批请求用例为批次内的 `query-cases.json`，独立正确要点为 `acceptance-cases.json`；使用 `product.verify_batch.QueryCase` / `run_checks` 执行，实际请求只发送问题和查询参数，不发送评审答案。
 
-## 既有两款基线：京康优护、京安泰
+## 历史：既有两款基线京康优护、京安泰
 
 既有修正批次为 `two-products-v5`，工作区 `products_two_v5`、端口9623。京康优护、京安泰的6份原件已全量重抽并写入：171个完整语义片段、204个实体、294条关系及三类向量均通过读回。抽取共177次调用（含6次局部纠正），未复用旧选择。独立图审核确认5条零额错误边消失，原表四计划正向责任边为1/3/3/4，保障范围选项归为合同规则，门急诊未混入住院期满延续内容，现金价值合同知识保留。
 
@@ -42,10 +98,10 @@ v2基线技术读回已通过，WebUI可同步测试；业务准确性验收尚�
 
 ## 当前入口与模型
 
-- 当前v5 WebUI：<http://127.0.0.1:9623/webui/>；问答：<http://127.0.0.1:9623/workspace/>。
+- 当前累计5款 WebUI：<http://127.0.0.1:9623/webui/>；问答：<http://127.0.0.1:9623/workspace/>。
 - v2基线 WebUI：<http://127.0.0.1:9621/webui/>；问答：<http://127.0.0.1:9621/workspace/>。
 - v3对照候选 WebUI：<http://127.0.0.1:9622/webui/>；问答：<http://127.0.0.1:9622/workspace/>。
-- 默认批次：`two-products-v5`，工作区：`products_two_v5`；v2/v3基线保留，管理时显式指定批次。
+- 默认服务配置及固定工作区均为 `master`；实际产品以 `output/workspaces/master/registry.json` 为准，新增导入使用各自批次记录。
 - 回答：`qwen3.7-plus`，`enable_thinking=false`；抽取和关键词：`qwen3.8-flash`，关闭思考。
 - 向量：`qwen3.7-text-embedding`，1024 维，输入上限8192 token。
 - 重排：`RERANK_BINDING=aliyun`、`RERANK_MODEL=qwen3.7-text-rerank`，使用已验证的原生阿里云接口。
@@ -65,11 +121,15 @@ v2基线技术读回已通过，WebUI可同步测试；业务准确性验收尚�
 
 ## 当前问答方式
 
+产品服务与SDK诊断默认 `VECTOR_CHUNK_CANDIDATE_MULTIPLIER=4`，将向量候选池从12扩大到48后再重排；最终片段上限及token预算不扩大。原生默认仍为1，可显式配置1..16。`metadata.chunk_stages`及日志保留向量候选、合并候选和最终片段ID，便于定位漏段阶段。
+
 沿用原生 `mix` 检索、关键词与阿里云重排；使用公开的 `WEIGHT` 选择已命中图实体的来源片段，实体/关系预算2000/2500，总预算18000，片段上限12。模型的事实依据为同次检索到的完整原文及真实标题、上级条件和定义。图描述只用于定位，不替代原文支持的判断。
 
-默认入口为 `product.server` 的 `AnswerQuery`。它将所有候选原文按实际文件引用归组，模型可见的引用只有文件编号；内部片段编号仅用于追踪。实际配置的 `USER_PROMPT_PREFIX_FILE` 作为可信问答指令生效。`qwen3.7-plus` 一次调用直接生成答案，真实模型文本流逐段返回；不调用旧 `GroundedQuery` 的证据选择、补证、标题过滤或原文渲染流程。旧模块留作历史诊断及来源解析复用。
+默认入口为 `product.server` 的 `AnswerQuery`。它将所有候选原文按实际文件引用归组，模型可见的引用只有文件编号；内部片段编号仅用于追踪。实际配置的 `USER_PROMPT_PREFIX_FILE` 作为可信问答指令生效。自然v6先生成草稿，再将完整同次原文与草稿交给独立审核调用，核对计划/责任范围、公式基数和比较结论。程序另按原文中明确的计划标题切分可追溯区间，或从唯一的上级计划标题继承范围，作为 `plan_scope_index` 同时提供给生成和审核；多计划父段不推定归属，不改写或删除完整原文。审核失败可返回至多两次修正版，修正版必须再次审核通过；仍失败或审核协议无效则显式报错，不向客户端泄露草稿。正常为2次模型调用。审核协议错误（含Schema回显、修正版引用缺失）共享2次重试；未解决的否决允许1次独立复核；语义修正最多2次且每次必须再审。总计最多1次草稿加5次审核，共用原有超时和并发上限，耗尽仍拒绝交付。不会通过解析说明文字把false擅自改成true。费用比较另有程序检查：从同文件原文乘法公式提取费用名、基数及费率，若答案对不同字面基数作肯定的“基数相同/一致/一样”断言，即使模型审核通过也会拦截并要求修正。此检查只覆盖可解析的公式和明确的同基数断言，不是通用数学或语义证明。HTTP流接口保留，但首段答案等待审核完成后整体返回，不再逐token透传，因此v4首字延迟数据不适用于v6。旧 `GroundedQuery` 仅留作历史诊断及来源解析复用。
 
-原生旧答案缓存和自然回答缓存均关闭，避免旧摘录被当作生成结果复用。模型引用未知文件、流异常或超时会显式报错；程序不猜测引用映射，不回退原文展示。引用句法校验只能证明编号来自本次资料，语义准确性仍按每次真实回答及原文独立核查。
+原生旧答案缓存和自然回答缓存均关闭，避免旧摘录被当作生成结果复用。模型引用未知文件、流异常或超时会显式报错；程序不猜测引用映射，不回退原文展示。引用句法校验只能证明编号来自本次资料；新增模型审核是可观测的语义交付门禁，不是确定性事实证明，仍需真实样本验收。草稿日志标为 `source_answer_draft`，审核输入、原始响应和耗时标为 `answer_audit`，只有通过后交付完成才记录 `source_answer/completed`。
+
+关键词高低层同时为空时，不再以问题50字符为界提前退出：按当前模式用原问题补齐检索通道，`mix`继续向量检索及重排。失败原始响应、问题哈希、字段有效性和解析结果写入warning日志；正常响应记录在debug日志。真实检索无结果仍可返回无上下文，存储或检索异常仍传播为错误。
 
 ## 抽取配置的扩展
 
@@ -257,11 +317,11 @@ make -f product/Makefile verify
 make -f product/Makefile qa
 ```
 
-默认批次为 `two-products-v5`；管理基线时显式追加 `BATCH=two-products-v2` 或 `BATCH=two-products-v3`，分别使用9621/9622。`start/status/stop` 默认管理9623服务，`verify`只检查已发布的落盘索引，`qa`通过原生HTTP执行11类问题各3次，保存同次回答引用的片段及首字、总耗时。片段引用不是完整模型提示，独立诊断请求也不能冒充历史回答实际上下文。
+默认服务批次为 `master`；管理历史文件基线时显式指定其旧批次，不能与当前数据库master混用。`start/status/stop` 默认管理9623服务；`verify`从数据库独立导出累计命名空间后核对，不读取旧文件库；`qa`的内置用例仍仅覆盖京康优护/京安泰，新增产品应使用其独立问题集。片段引用不是完整模型提示，独立诊断请求也不能冒充历史回答实际上下文。
 
 需要核对某次回答实际使用的完整模型输入时，先停止HTTP服务，再执行 `.venv/bin/python -m product.query_trace --batch two-products-v5 --repeat 1`。该工具通过公开角色回调捕获同次原生SDK问答的系统提示、用户输入和回答；诊断临时关闭原生关键词/回答缓存，保留磁盘缓存，不能将其耗时当成缓存命中速度。结束后重新 `start`。
 
-新批次复现（必须使用新的批次名和工作区）：
+独立对照复现（仅需保留隔离对照时使用新工作区；日常追加用顶部的同库增量流程）：
 
 ```sh
 .venv/bin/python -m product.prepare_batch --batch NEW_BATCH --workspace NEW_WORKSPACE --products 京康优护 京安泰

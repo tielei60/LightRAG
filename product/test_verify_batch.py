@@ -22,12 +22,66 @@ from product.verify_batch import (
     run_checks,
     run_query,
     summarize_timings,
+    verification_source,
+    verification_storage,
     verify_snapshot,
 )
 
 
 def write(path, value):
     path.write_text(json.dumps(value, ensure_ascii=False), encoding="utf-8")
+
+
+def test_incremental_readback_uses_registered_workspace_instead_of_last_batch(tmp_path):
+    registry = tmp_path / "registry.json"
+    registry.write_text("{}")
+    batch, accumulated = tmp_path / "batch", tmp_path / "accumulated"
+    with (
+        patch("product.workspace_registry.registry_path", return_value=registry),
+        patch(
+            "product.workspace_registry.workspace_snapshot", return_value=accumulated
+        ) as snapshot,
+    ):
+        assert verification_source(tmp_path, batch, "products") == accumulated
+    snapshot.assert_called_once_with(tmp_path, "products")
+
+
+def test_unregistered_readback_preserves_single_batch_behavior(tmp_path):
+    with (
+        patch(
+            "product.workspace_registry.registry_path",
+            return_value=tmp_path / "absent.json",
+        ),
+        patch("product.workspace_registry.workspace_snapshot") as snapshot,
+    ):
+        assert (
+            verification_source(tmp_path, tmp_path / "batch", "products")
+            == tmp_path / "batch"
+        )
+    snapshot.assert_not_called()
+
+
+def test_database_verification_reads_database_without_using_a_stale_local_target(
+    tmp_path,
+):
+    stale = tmp_path / "storage/master"
+    stale.mkdir(parents=True)
+    export = tmp_path / "database-export"
+
+    async def snapshot(config, root, directory):
+        assert config["WORKSPACE"] == "master"
+        assert root == tmp_path
+        assert directory.parent == tmp_path / "batch/verification"
+        return export
+
+    config = {"WORKSPACE": "master", "WORKING_DIR": str(tmp_path / "storage")}
+    with (
+        patch("product.database_storage.is_database_backend", return_value=True),
+        patch(
+            "product.database_storage.snapshot_database_config", side_effect=snapshot
+        ),
+    ):
+        assert verification_storage(tmp_path, tmp_path / "batch", config) == export
 
 
 class ReadbackTests(unittest.TestCase):

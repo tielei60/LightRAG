@@ -1,8 +1,8 @@
-"""Generate natural answers from the current native sources in one model stream.
+"""Generate and audit natural answers against the current native sources.
 
-The model owns answer wording and presentation. This adapter forwards its real
-tokens, checks citation syntax against the same request, and appends file
-references. Citation checks establish provenance bounds, not semantic accuracy.
+The model owns answer wording and presentation. The private draft transport
+checks citations; the public adapter buffers its output until an independent
+semantic audit accepts it.
 """
 
 from __future__ import annotations
@@ -16,9 +16,11 @@ import time
 from collections.abc import Callable
 from typing import Any
 
+from product.answer_audit import AuditedAnswerMixin
 from product.grounded_query import parse_source_context, provider_limits
+from product.source_scope import plan_scope_index
 
-ANSWER_CONTRACT_VERSION = "natural-source-answer-v4"
+ANSWER_CONTRACT_VERSION = "audited-source-answer-v6"
 
 ANSWER_SYSTEM_PROMPT = """你是保险产品资料问答助手。根据本次提供的完整原文单元回答当前问题，并结合历史理解追问对象。
 先直接回答用户的核心问题，再用简洁自然的语言说明必要依据、条件和区别；多个子问逐项答全。
@@ -41,7 +43,8 @@ governing_context逐字提供同一原文片段的上级前提或共有限制。
 只讨论用户明确询问的产品；检索到其他产品不表示用户要求比较。标签未定义时，只列出所问产品自己的已有名称供确认，不额外介绍另一产品。
 涉及具体金额、报价或数值结果时，只报告原文明示的所问对象和条件下的值，不计算、换算或猜测原文未给出的新数字。
 只有公式、一般规则或缺少参数时，说明尚不能确定具体值，可解释已有规则及缺少的信息；不得编造现金价值或计算结果。
-依据不足的部分明确说明资料未提供什么，不用无依据的猜测补齐；不要把已有条款本身也一并拒答。
+依据不足的部分明确说明本次检索未提供什么，不用无依据的猜测补齐；不要把已有条款本身也一并拒答。
+本次上下文未出现某产品的条款，不能推出该产品没有该责任，也不能将别的产品同类条款断言为其专属规则。
 
 每项依据原文作出的事实、判断或比较，都在相关句子后原样标注对应文件在source_documents中的键。
 这些文件键是唯一引用标签；同一文件的所有摘录共用它。正文的条款号、章节号、列表序号和出现顺序都不是引用编号。
@@ -133,7 +136,7 @@ def _check_citations(text: str, references: dict[str, str], *, complete=False):
     return cited
 
 
-class AnswerQuery:
+class _DraftAnswerQuery:
     """One configured model call, real streaming, bounded provider lifetime.
 
     Streaming and nonstreaming requests consume the same provider stream.
@@ -250,6 +253,16 @@ class AnswerQuery:
                 + "。只原样引用source_documents对应文件的键；不得将原文条款号、"
                 "章节号、列表号或摘录顺序转换成引用编号。"
             )
+            scopes = plan_scope_index(source_documents)
+            if scopes:
+                provider_system += (
+                    "\n以下plan_scope_index由程序按明确计划标题及上级标题定位，text是未改写的原文区间。"
+                    "跨计划不得借用责任；索引未提及不等于绝对不保，但不能据此编造该计划责任。"
+                    "完整责任清单中某计划仅列生存金时，不得用另一计划身故金补齐。"
+                    "\n<plan_scope_index>\n"
+                    + json.dumps(scopes, ensure_ascii=False)
+                    + "\n</plan_scope_index>"
+                )
             options = {
                 key: value
                 for key, value in kwargs.items()
@@ -402,6 +415,10 @@ class AnswerQuery:
             if isinstance(exc, Exception) and not str(exc):
                 raise AnswerError(f"问答生成失败：{type(exc).__name__}。") from exc
             raise
+
+
+class AnswerQuery(AuditedAnswerMixin, _DraftAnswerQuery):
+    """Release only audited answers, with bounded independently checked repairs."""
 
 
 __all__ = ["ANSWER_CONTRACT_VERSION", "AnswerError", "AnswerQuery", "provider_limits"]

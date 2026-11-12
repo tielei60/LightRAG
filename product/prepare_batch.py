@@ -591,6 +591,7 @@ def build_batch(
     config_path: Path | None = None,
     token_limit: int = 6000,
     target_tokens: int = 1800,
+    append: bool = False,
 ) -> dict:
     if not re.fullmatch(r"[a-z0-9_-]+", batch) or not re.fullmatch(
         r"[A-Za-z0-9_-]+", workspace
@@ -605,16 +606,24 @@ def build_batch(
         raise ValueError(
             "Batch already exists; inspect it instead of overwriting reviewed artifacts"
         )
-    if (ROOT / "rag_storage" / workspace).exists():
-        raise ValueError("Target workspace exists; use a new candidate batch")
+    config = dict(dotenv_values(config_path, interpolate=False))
+    if not config:
+        raise ValueError("Base configuration is empty")
+    from product.database_storage import is_database_backend
+
+    database = is_database_backend(config)
+    target_exists = (ROOT / "rag_storage" / workspace).is_dir()
+    if target_exists and not append and not database:
+        raise ValueError("Target workspace exists; use --append for incremental import")
+    if append and not target_exists and not database:
+        raise ValueError("Incremental preparation requires an existing workspace")
     import tiktoken
 
     encoder = tiktoken.encoding_for_model("gpt-4o-mini")
     count = lambda value: len(encoder.encode(value))
     documents, excluded = discover(source_root, folders)
-    config = dict(dotenv_values(config_path, interpolate=False))
-    if not config:
-        raise ValueError("Base configuration is empty")
+    if append and config.get("WORKSPACE") != workspace:
+        raise ValueError("Incremental configuration must name the target workspace")
     embedding_limit = int(config.get("EMBEDDING_TOKEN_LIMIT") or 8192)
     if not 0 < target_tokens <= token_limit <= embedding_limit:
         raise ValueError("Prepared-unit limit must fit the embedding input limit")
@@ -679,16 +688,25 @@ def build_batch(
         {
             "WORKSPACE": workspace,
             "HOST": "127.0.0.1",
-            "PORT": "9621",
+            "PORT": (config.get("PORT") or "9621") if append else "9621",
             "WORKING_DIR": str(ROOT / "rag_storage"),
             "INPUT_DIR": str(ROOT / "inputs"),
-            "PROMPT_DIR": str(ROOT / "product/prompt_profiles"),
+            "PROMPT_DIR": (
+                config.get("PROMPT_DIR") or str(ROOT / "product/prompt_profiles")
+            )
+            if append
+            else str(ROOT / "product/prompt_profiles"),
             "LOG_DIR": str(ROOT / "output/logs"),
-            "TOP_K": "30",
-            "CHUNK_TOP_K": "12",
-            "MAX_ENTITY_TOKENS": "4000",
-            "MAX_RELATION_TOKENS": "5000",
-            "MAX_TOTAL_TOKENS": "18000",
+            **{
+                key: (config.get(key) or value) if append else value
+                for key, value in {
+                    "TOP_K": "30",
+                    "CHUNK_TOP_K": "12",
+                    "MAX_ENTITY_TOKENS": "4000",
+                    "MAX_RELATION_TOKENS": "5000",
+                    "MAX_TOTAL_TOKENS": "18000",
+                }.items()
+            },
         }
     )
     runtime = output / "runtime.env"
@@ -704,6 +722,7 @@ def build_batch(
     manifest = {
         "batch": batch,
         "workspace": workspace,
+        "ingestion_mode": "append" if append else "new",
         "source_root": str(source_root),
         "expected_product_count": len(folders),
         "documents": entries,
@@ -733,12 +752,21 @@ def build_batch(
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--batch", required=True)
-    parser.add_argument("--workspace", required=True)
+    parser.add_argument(
+        "--workspace",
+        default="master",
+        help="Default master workspace; override only for an isolated test",
+    )
     parser.add_argument(
         "--products", nargs="+", required=True, help="Product folders under source root"
     )
     parser.add_argument("--source-root", type=Path)
     parser.add_argument("--config", type=Path)
+    parser.add_argument(
+        "--append",
+        action="store_true",
+        help="Prepare a new import batch for an existing workspace",
+    )
     parser.add_argument("--token-limit", type=int, default=6000)
     parser.add_argument("--target-tokens", type=int, default=1800)
     args = parser.parse_args()
@@ -750,6 +778,7 @@ def main() -> None:
         config_path=args.config,
         token_limit=args.token_limit,
         target_tokens=args.target_tokens,
+        append=args.append,
     )
     print(
         json.dumps(

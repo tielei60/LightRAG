@@ -290,6 +290,7 @@ def build_native_rag(config: dict[str, Any]):
     os.environ.update(
         {key: value for key, value in config.items() if value is not None}
     )
+    os.environ.setdefault("VECTOR_CHUNK_CANDIDATE_MULTIPLIER", "4")
     from lightrag import LightRAG
     from lightrag.llm.openai import openai_complete_if_cache, openai_embed
     from lightrag.llm_roles import RoleLLMConfig
@@ -347,9 +348,12 @@ def build_native_rag(config: dict[str, Any]):
         )
         for role, func in functions.items()
     }
+    from product.database_storage import storage_options
+
     rag = LightRAG(
         working_dir=config["WORKING_DIR"],
         workspace=config["WORKSPACE"],
+        **storage_options(config),
         llm_model_func=refuse_extract,
         llm_model_name=config["EXTRACT_LLM_MODEL"],
         role_llm_configs=roles,

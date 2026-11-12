@@ -4652,11 +4652,15 @@ async def kg_query(
     if hl_keywords == [] and query_param.mode in ["global", "hybrid", "mix"]:
         logger.warning("high_level_keywords is empty")
     if hl_keywords == [] and ll_keywords == []:
-        if len(query) < 50:
-            logger.warning(f"Forced low_level_keywords to origin query: {query}")
+        # Extraction failure says nothing about evidence availability. Seed
+        # every active graph channel and preserve mix's vector retrieval.
+        logger.warning(
+            "Empty keywords; using original query (mode=%s)", query_param.mode
+        )
+        if query_param.mode in {"local", "hybrid", "mix"}:
             ll_keywords = [query]
-        else:
-            return QueryResult(content=PROMPTS["fail_response"], llm_generated=False)
+        if query_param.mode in {"global", "hybrid", "mix"}:
+            hl_keywords = [query]
 
     ll_keywords_str = ", ".join(ll_keywords) if ll_keywords else ""
     hl_keywords_str = ", ".join(hl_keywords) if hl_keywords else ""
@@ -4975,7 +4979,11 @@ def _parse_keywords_payload(result: Any) -> tuple[bool, list[str], list[str]]:
     ll_keywords = _normalize_keyword_list(
         payload.get("low_level_keywords"), "low_level_keywords"
     )
-    return True, hl_keywords, ll_keywords
+    valid = all(
+        isinstance(payload.get(key), (str, list))
+        for key in ("high_level_keywords", "low_level_keywords")
+    )
+    return valid, hl_keywords, ll_keywords
 
 
 async def extract_keywords_only(
@@ -5047,7 +5055,16 @@ async def extract_keywords_only(
     result = await use_model_func(kw_prompt, response_format={"type": "json_object"})
 
     # 5. Parse out JSON from the LLM response with tolerant provider normalization
-    _, hl_keywords, ll_keywords = _parse_keywords_payload(result)
+    valid, hl_keywords, ll_keywords = _parse_keywords_payload(result)
+    trace = logger.debug if valid and (hl_keywords or ll_keywords) else logger.warning
+    trace(
+        "Keyword extraction query_id=%s valid_schema=%s raw_response=%r high=%r low=%r",
+        args_hash,
+        valid,
+        result,
+        hl_keywords,
+        ll_keywords,
+    )
 
     # 6. Cache only the processed keywords with cache type
     #    Skip caching when the LLM response was truncated by the token limit:
@@ -5117,6 +5134,13 @@ async def _get_vector_context(
     # answer instead of a retrieval failure (and, in mix mode, silently
     # dropped the vector-search branch while KG results kept flowing).
     search_top_k = query_param.chunk_top_k or query_param.top_k
+    # Candidate recall and final context size are separate budgets. Services
+    # with similar documents can overfetch before reranking without enlarging
+    # the final context. The default preserves existing retrieval behavior.
+    multiplier = get_env_value("VECTOR_CHUNK_CANDIDATE_MULTIPLIER", 1, int)
+    if not 1 <= multiplier <= 16:
+        raise ValueError("VECTOR_CHUNK_CANDIDATE_MULTIPLIER must be between 1 and 16")
+    search_top_k *= multiplier
     cosine_threshold = chunks_vdb.cosine_better_than_threshold
 
     results = await chunks_vdb.query(
@@ -5988,6 +6012,24 @@ async def _build_query_context(
     # Add complete metadata to raw_data (preserve existing metadata including query_mode)
     if "metadata" not in raw_data:
         raw_data["metadata"] = {}
+
+    # Keep stage identities so a missing clause can be localized to recall or
+    # context selection without guessing from the final model prompt.
+    chunk_stages = {
+        "vector_candidates": [
+            c.get("chunk_id") for c in search_result["vector_chunks"]
+        ],
+        "merged_candidates": [c.get("chunk_id") for c in merged_chunks],
+        "final_chunks": [
+            c.get("chunk_id") for c in raw_data.get("data", {}).get("chunks", [])
+        ],
+    }
+    raw_data["metadata"]["chunk_stages"] = chunk_stages
+    logger.info(
+        "Query chunk stages query_id=%s: %s",
+        compute_args_hash(query),
+        json.dumps(chunk_stages),
+    )
 
     # Update keywords while preserving existing metadata
     raw_data["metadata"]["keywords"] = {

@@ -474,6 +474,69 @@ class BatchTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "already exists"):
             self.build()
 
+    def test_existing_workspace_requires_explicit_incremental_mode(self):
+        (self.root / "rag_storage/products_two").mkdir(parents=True)
+        with self.assertRaisesRegex(ValueError, "--append"):
+            self.build()
+        self.assertFalse((self.root / "output/two").exists())
+
+    def test_incremental_preparation_preserves_target_query_configuration(self):
+        (self.root / "rag_storage/products_two").mkdir(parents=True)
+        self.config.write_text(
+            self.config.read_text()
+            + "WORKSPACE=products_two\nPORT=9623\nMAX_ENTITY_TOKENS=2000\n"
+            + "MAX_RELATION_TOKENS=2500\nPROMPT_DIR=/frozen/profile\n"
+        )
+        manifest = prepare_batch.build_batch(
+            "append-one",
+            ["甲"],
+            "products_two",
+            source_root=self.sources,
+            config_path=self.config,
+            append=True,
+        )
+        config = prepare_batch.dotenv_values(
+            self.root / "output/append-one/runtime.env"
+        )
+        self.assertEqual(manifest["ingestion_mode"], "append")
+        self.assertEqual(len(manifest["documents"]), 3)
+        self.assertEqual(config["WORKSPACE"], "products_two")
+        self.assertEqual(config["PORT"], "9623")
+        self.assertEqual(config["MAX_ENTITY_TOKENS"], "2000")
+        self.assertEqual(config["MAX_RELATION_TOKENS"], "2500")
+        self.assertEqual(config["PROMPT_DIR"], "/frozen/profile")
+
+    def test_incremental_preparation_refuses_missing_or_different_target(self):
+        options = {
+            "source_root": self.sources,
+            "config_path": self.config,
+            "append": True,
+        }
+        with self.assertRaisesRegex(ValueError, "existing workspace"):
+            prepare_batch.build_batch("append-one", ["甲"], "products_two", **options)
+        (self.root / "rag_storage/products_two").mkdir(parents=True)
+        with self.assertRaisesRegex(ValueError, "target workspace"):
+            prepare_batch.build_batch("append-one", ["甲"], "products_two", **options)
+        self.assertFalse((self.root / "output/append-one").exists())
+
+    def test_database_append_preparation_does_not_require_local_storage_files(self):
+        self.config.write_text(
+            self.config.read_text() + "WORKSPACE=master\nPORT=9623\n"
+            "LIGHTRAG_KV_STORAGE=PGKVStorage\nLIGHTRAG_VECTOR_STORAGE=PGVectorStorage\n"
+            "LIGHTRAG_GRAPH_STORAGE=Neo4JStorage\nLIGHTRAG_DOC_STATUS_STORAGE=PGDocStatusStorage\n"
+        )
+        manifest = prepare_batch.build_batch(
+            "db-append",
+            ["甲"],
+            "master",
+            source_root=self.sources,
+            config_path=self.config,
+            append=True,
+        )
+        self.assertEqual(manifest["workspace"], "master")
+        self.assertEqual(manifest["ingestion_mode"], "append")
+        self.assertFalse((self.root / "rag_storage/master").exists())
+
     def test_missing_required_source_prevents_partial_batch_output(self):
         (self.sources / "乙" / "测试乙保险投保及核保规则.md").unlink()
         with self.assertRaisesRegex(ValueError, "required document role"):

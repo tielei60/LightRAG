@@ -168,6 +168,48 @@ def reuse_approved_selections(adapter, requests: dict, previous: Path) -> dict:
     }
 
 
+def reuse_approved_batches(
+    adapter, requests: dict, root: Path, batch_names: list[str]
+) -> dict:
+    """Revalidate a complete union of historical batches for database replay."""
+    from product.evidence_extract import PointerResult, to_native
+    from product.workspace_registry import load_reviewed_batch
+
+    if not batch_names or len(batch_names) != len(set(batch_names)):
+        raise ValueError("Unique approved source batches are required")
+    historical = {}
+    for name in batch_names:
+        previous = load_reviewed_batch(root, name)
+        for prompt, chunk in previous.requests.items():
+            if prompt in historical:
+                raise ValueError(
+                    "Approved source batches contain duplicate extraction inputs"
+                )
+            historical[prompt] = (chunk, previous.selections[digest(prompt)])
+    if set(historical) != set(requests):
+        raise ValueError(
+            "Approved source batch union differs from the current import scope"
+        )
+    checked = []
+    for prompt, chunk in requests.items():
+        old, row = historical[prompt]
+        if old != chunk:
+            raise ValueError(
+                "Historical source or evidence identity differs from the current input"
+            )
+        selection = PointerResult.model_validate(row["selection"])
+        native = to_native(selection, chunk, profile=adapter.profile)
+        checked.append((digest(prompt), selection, native))
+    for key, selection, native in checked:
+        adapter.persist_selection(key, selection, native)
+    return {
+        "source_batches": batch_names,
+        "revalidated_chunks": len(checked),
+        "provider_called": False,
+        "method": "exact union of reviewed prompt/source/content/unit identities; current pointer validation",
+    }
+
+
 def validate_native_identities(approved: dict) -> None:
     """Refuse lossy identifier normalization or truncation before native writes."""
     from lightrag.constants import DEFAULT_ENTITY_NAME_MAX_LENGTH
@@ -185,6 +227,23 @@ def validate_native_identities(approved: dict) -> None:
                     "Entity identifiers collide after native normalization"
                 )
             seen[normalized] = name
+
+
+def incremental_replay_adapter(
+    options: dict, old_requests: dict, old_selections: dict, new_selections: dict
+):
+    """Restore old selected provenance before native shared-object merges."""
+    from product.evidence_extract import EvidenceExtractor
+
+    requests = {**old_requests, **options["requests"]}
+    if len(requests) != len(old_requests) + len(options["requests"]):
+        raise ValueError("New extraction input collides with registered evidence")
+    adapter = EvidenceExtractor(
+        **{**options, "requests": requests, "ledger_path": None}, replay_only=True
+    )
+    adapter.selections = {**old_selections, **new_selections}
+    adapter.activate_sources([chunk.source for chunk in old_requests.values()])
+    return adapter
 
 
 def readback_files(target: Path, documents: list, approved: dict) -> dict:
@@ -243,6 +302,24 @@ def readback_files(target: Path, documents: list, approved: dict) -> dict:
         frozenset((row["src_id"], row["tgt_id"])): row
         for row in vector_rows["relationships"]
     }
+    expected_entities = {
+        normalize_entity_name(entity["name"])
+        for item in approved.values()
+        for entity in item["native"]["entities"]
+    }
+    expected_relationships = {
+        frozenset(normalize_entity_name(relation[key]) for key in ("source", "target"))
+        for item in approved.values()
+        for relation in item["native"]["relationships"]
+    }
+    if set(graph.nodes) != expected_entities:
+        errors.append(
+            "Persisted graph entities differ from the complete approved scope"
+        )
+    if {frozenset(edge) for edge in graph.edges} != expected_relationships:
+        errors.append(
+            "Persisted graph relations differ from the complete approved scope"
+        )
     for item in approved.values():
         native = item["native"]
         for entity in native["entities"]:
@@ -300,12 +377,83 @@ def readback_files(target: Path, documents: list, approved: dict) -> dict:
     }
 
 
-async def apply_batch(apply: bool, approved_from: str | None = None) -> None:
+async def apply_batch(
+    apply: bool,
+    approved_from: str | None = None,
+    *,
+    append: bool = False,
+    base_batch: str | None = None,
+    approved_batches: list[str] | None = None,
+) -> None:
+    """Import a new batch, or explicitly append it to a registered workspace."""
+    if base_batch is not None and not append:
+        raise ValueError("--base-batch requires explicit --append")
+    from product.database_storage import is_database_backend
+
+    if approved_from is not None and approved_batches:
+        raise ValueError("Use one approval reuse option, not both")
+    if apply and (append or is_database_backend(manage.settings())):
+        from product.workspace_registry import read_json, workspace_writer, write_json
+
+        config = manage.settings()
+        with workspace_writer(manage.ROOT, config["WORKSPACE"]):
+            try:
+                await _apply_batch(
+                    apply,
+                    approved_from,
+                    append=append,
+                    base_batch=base_batch,
+                    approved_batches=approved_batches,
+                )
+            except BaseException as exc:
+                journal = manage.OUTPUT / (
+                    "append-journal.json" if append else "database-import-journal.json"
+                )
+                if journal.exists():
+                    state = read_json(journal)
+                    if state.get("state") != "completed":
+                        write_json(
+                            journal,
+                            {
+                                **state,
+                                "state": "failed_inspect_backup",
+                                "error_type": type(exc).__name__,
+                            },
+                        )
+                raise
+    else:
+        await _apply_batch(
+            apply,
+            approved_from,
+            append=append,
+            base_batch=base_batch,
+            approved_batches=approved_batches,
+        )
+
+
+async def _apply_batch(
+    apply: bool,
+    approved_from: str | None,
+    *,
+    append: bool,
+    base_batch: str | None,
+    approved_batches: list[str] | None = None,
+) -> None:
     files = manage.checked_files()
     config = manage.settings()
+    from product.database_storage import (
+        is_database_backend,
+        storage_contract,
+        storage_options,
+    )
+
+    database = is_database_backend(config)
+    backend = storage_contract(config)
     manifest = json.loads(manage.MANIFEST.read_text())
     if manifest["workspace"] != config["WORKSPACE"]:
         raise ValueError("Workspace does not match manifest")
+    if manifest.get("ingestion_mode") == "append" and not append:
+        raise ValueError("This manifest requires explicit --append")
     if config["MAX_GLEANING"] != "0":
         raise ValueError(
             "Evidence replay requires initial extraction only (MAX_GLEANING=0)"
@@ -389,6 +537,77 @@ async def apply_batch(apply: bool, approved_from: str | None = None) -> None:
                 raise ValueError("Duplicate extraction input")
             requests[prompt] = chunk
         documents.append((entry, payload))
+    target = manage.ROOT / "rag_storage" / config["WORKSPACE"]
+    database_before = None
+    if database:
+        from product.database_storage import snapshot_database_config
+        from product.workspace_registry import read_json, registry_path
+
+        database_before = await snapshot_database_config(
+            config,
+            manage.ROOT,
+            manage.OUTPUT / "database-snapshots" / f"before-{time.time_ns()}",
+        )
+        counts = read_json(database_before / "database-export.json")["counts"]
+        if not append and (
+            any(counts.values())
+            or registry_path(manage.ROOT, config["WORKSPACE"]).exists()
+        ):
+            raise ValueError(
+                "Database workspace is not empty or already registered; use --append"
+            )
+    registry = None
+    historical_batches = []
+    old_documents, old_requests, old_approved, old_selections = [], {}, {}, {}
+    if append:
+        from product.verify_batch import verify_snapshot
+        from product.workspace_registry import (
+            embedding_contract,
+            load_registered_batches,
+            snapshot_for_batches,
+            validate_additions,
+        )
+
+        if not database and not target.is_dir():
+            raise ValueError("Incremental import requires an existing workspace")
+        registry, historical_batches = load_registered_batches(
+            manage.ROOT, config["WORKSPACE"], base_batch
+        )
+        if registry["embedding"] != embedding_contract(config):
+            raise ValueError(
+                "Embedding model, binding or dimension differs from the existing workspace"
+            )
+        from product.database_storage import STORAGE_DEFAULTS
+
+        if registry.get("storage", STORAGE_DEFAULTS) != backend:
+            raise ValueError(
+                "The workspace uses different storage backends or database endpoints"
+            )
+        for previous in historical_batches:
+            old_documents.extend(previous.documents)
+            for current, extra in (
+                (old_requests, previous.requests),
+                (old_approved, previous.approved),
+                (old_selections, previous.selections),
+            ):
+                if current.keys() & extra.keys():
+                    raise ValueError("Registered historical extraction inputs collide")
+                current.update(extra)
+        validate_additions(old_documents, documents)
+        persisted = database_before if database else target
+        old_report = readback_files(persisted, old_documents, old_approved)
+        snapshot = snapshot_for_batches(
+            manage.ROOT, config["WORKSPACE"], historical_batches, registry
+        )
+        detailed = verify_snapshot(snapshot, persisted, int(config["EMBEDDING_DIM"]))
+        if not old_report["technical_passed"] or not detailed["passed"]:
+            raise ValueError(
+                "Existing workspace does not match its registered sources; inspect readback"
+            )
+        manage.save_json(
+            manage.OUTPUT / "before-append-readback.json",
+            {"evidence": old_report, "indexes": detailed},
+        )
     print(
         json.dumps(
             {
@@ -396,6 +615,8 @@ async def apply_batch(apply: bool, approved_from: str | None = None) -> None:
                 "documents": [e["ingestion_label"] for e, _ in documents],
                 "chunks": len(requests),
                 "apply": apply,
+                "append": append,
+                "existing_documents": len(old_documents),
             },
             ensure_ascii=False,
         ),
@@ -403,7 +624,6 @@ async def apply_batch(apply: bool, approved_from: str | None = None) -> None:
     )
     if not apply:
         return
-    target = manage.ROOT / "rag_storage" / config["WORKSPACE"]
     if manage.PID_FILE.exists():
         try:
             os.kill(int(manage.PID_FILE.read_text()), 0)
@@ -411,8 +631,16 @@ async def apply_batch(apply: bool, approved_from: str | None = None) -> None:
             pass
         else:
             raise ValueError("Stop the batch server before the SDK writer starts")
-    if target.exists() or manage.RECEIPTS.exists():
+    if (target.exists() and not append and not database) or manage.RECEIPTS.exists():
         raise ValueError("Target or receipt exists; inspect it instead of replaying")
+    if append and (manage.OUTPUT / "append-journal.json").exists():
+        raise ValueError(
+            "Append journal exists; inspect its original result before retrying"
+        )
+    if database and (manage.OUTPUT / "database-import-journal.json").exists():
+        raise ValueError(
+            "Database import journal exists; inspect the original operation"
+        )
     contract_hash = digest(
         json.dumps(
             {
@@ -528,6 +756,11 @@ async def apply_batch(apply: bool, approved_from: str | None = None) -> None:
             raise ValueError("Approval reuse requires a distinct new candidate batch")
         reused = reuse_approved_selections(approval_adapter, requests, previous)
         manage.save_json(manage.OUTPUT / "approval-reuse.json", reused)
+    elif approved_batches:
+        reused = reuse_approved_batches(
+            approval_adapter, requests, manage.ROOT, approved_batches
+        )
+        manage.save_json(manage.OUTPUT / "approval-reuse.json", reused)
     approved = await approve_extractions(
         approval_adapter, requests, int(config["EXTRACT_MAX_ASYNC_LLM"])
     )
@@ -542,7 +775,15 @@ async def apply_batch(apply: bool, approved_from: str | None = None) -> None:
         },
     )
     # A fresh adapter keeps future documents out of the current merge ledger.
-    adapter = EvidenceExtractor(**adapter_options, replay_only=True)
+    if append:
+        all_approved = {**old_approved, **approved}
+        validate_native_identities(all_approved)
+        adapter = incremental_replay_adapter(
+            adapter_options, old_requests, old_selections, approval_adapter.selections
+        )
+    else:
+        all_approved = approved
+        adapter = EvidenceExtractor(**adapter_options, replay_only=True)
 
     async def embed(texts, **kwargs):
         return await openai_embed.func(
@@ -575,6 +816,7 @@ async def apply_batch(apply: bool, approved_from: str | None = None) -> None:
     rag = LightRAG(
         working_dir=str(target.parent),
         workspace=config["WORKSPACE"],
+        **storage_options(config),
         llm_model_func=role_function("extract"),
         llm_model_name=config["EXTRACT_LLM_MODEL"],
         role_llm_configs=roles,
@@ -611,7 +853,36 @@ async def apply_batch(apply: bool, approved_from: str | None = None) -> None:
             "summary_context_size": rag.summary_context_size,
         },
     )
+    backup = None
+    if append or database:
+        from product.workspace_registry import backup_workspace, write_json
+
+        backup = (
+            database_before if database else backup_workspace(target, manage.OUTPUT)
+        )
+        write_json(
+            manage.OUTPUT
+            / ("append-journal.json" if append else "database-import-journal.json"),
+            {
+                "state": "prepared",
+                "workspace": config["WORKSPACE"],
+                "batch": manage.OUTPUT.name,
+                "backup": str(backup),
+                "existing_batches": [batch.name for batch in historical_batches],
+                "existing_documents": len(old_documents),
+                "added_documents": len(documents),
+                "storage": backend,
+                "backup_type": "workspace-scoped native database verification export"
+                if database
+                else "native file copy",
+                "failure_recovery": "Inspect the operation and restore from retained database backup; no automatic rollback is claimed"
+                if database
+                else "Inspect the retained native file backup",
+                "started_at": time.time(),
+            },
+        )
     receipts = []
+    database_after = None
     try:
         await rag.initialize_storages()
         for entry, payload in documents:
@@ -646,15 +917,99 @@ async def apply_batch(apply: bool, approved_from: str | None = None) -> None:
                 raise RuntimeError(
                     "Native document did not finish; inspect original status"
                 )
+        if database:
+            from product.database_storage import capture_database_snapshot
+
+            # Public callbacks flush the native vector buffers before reading
+            # SQL. Reopening in a separate validation process remains possible.
+            for storage in (rag.entities_vdb, rag.relationships_vdb, rag.chunks_vdb):
+                await storage.index_done_callback()
+            database_after = await capture_database_snapshot(
+                rag, manage.OUTPUT / "database-snapshots" / "after-import"
+            )
 
     finally:
         await rag.finalize_storages()
-    report = readback_files(target, documents, approved)
+    persisted = database_after if database else target
+    report = readback_files(persisted, [*old_documents, *documents], all_approved)
+    report["workspace"] = config["WORKSPACE"]
+    report["storage"] = backend
     manage.save_json(manage.OUTPUT / "final-code-readback.json", report)
     manage.save_json(manage.OUTPUT / "final-document-status.json", receipts)
     print(json.dumps(report, ensure_ascii=False), flush=True)
     if not report["technical_passed"]:
         raise RuntimeError("Native readback failed; inspect final-code-readback.json")
+    if append:
+        from product.verify_batch import verify_snapshot
+        from product.workspace_registry import (
+            commit_append,
+            read_json,
+            verify_preserved,
+            write_json,
+        )
+
+        preservation = verify_preserved(backup, persisted)
+        manage.save_json(manage.OUTPUT / "preservation-readback.json", preservation)
+        if not preservation["passed"]:
+            raise RuntimeError(
+                "Append changed prior document evidence; inspect backup and preservation report"
+            )
+        # Complete source/evidence checks above precede publishing membership.
+        # Build the prospective full snapshot first, so an index failure cannot
+        # publish a registry that falsely claims the append completed.
+        from product.workspace_registry import batch_record, load_reviewed_batch
+
+        current_batch = load_reviewed_batch(manage.ROOT, manage.OUTPUT.name)
+        prospective = {
+            **registry,
+            "batches": [*registry["batches"], batch_record(current_batch)],
+        }
+        snapshot = snapshot_for_batches(
+            manage.ROOT,
+            config["WORKSPACE"],
+            [*historical_batches, current_batch],
+            prospective,
+        )
+        detailed = verify_snapshot(snapshot, persisted, int(config["EMBEDDING_DIM"]))
+        manage.save_json(manage.OUTPUT / "workspace-readback.json", detailed)
+        if not detailed["passed"]:
+            raise RuntimeError(
+                "Cumulative native indexes failed verification; inspect append backup"
+            )
+        commit_append(manage.ROOT, config["WORKSPACE"], registry, manage.OUTPUT.name)
+        journal_path = manage.OUTPUT / "append-journal.json"
+        write_json(
+            journal_path,
+            {
+                **read_json(journal_path),
+                "state": "completed",
+                "completed_at": time.time(),
+            },
+        )
+    elif database:
+        from product.verify_batch import verify_snapshot
+        from product.workspace_registry import (
+            commit_initial_database,
+            read_json,
+            write_json,
+        )
+
+        detailed = verify_snapshot(
+            manage.OUTPUT, persisted, int(config["EMBEDDING_DIM"])
+        )
+        manage.save_json(manage.OUTPUT / "workspace-readback.json", detailed)
+        if not detailed["passed"]:
+            raise RuntimeError("Initial database indexes failed verification")
+        commit_initial_database(manage.ROOT, config["WORKSPACE"], manage.OUTPUT.name)
+        journal_path = manage.OUTPUT / "database-import-journal.json"
+        write_json(
+            journal_path,
+            {
+                **read_json(journal_path),
+                "state": "completed",
+                "completed_at": time.time(),
+            },
+        )
 
 
 def main() -> None:
@@ -662,11 +1017,33 @@ def main() -> None:
     parser.add_argument("--batch", required=True)
     parser.add_argument("--apply", action="store_true")
     parser.add_argument(
+        "--append",
+        action="store_true",
+        help="Add this batch to an existing registered workspace",
+    )
+    parser.add_argument(
+        "--base-batch",
+        help="Reviewed batch that owns an existing unregistered workspace",
+    )
+    parser.add_argument(
         "--approved-from", help="Revalidate pointer selections from an earlier batch"
+    )
+    parser.add_argument(
+        "--approved-batches",
+        nargs="+",
+        help="Revalidate the exact union of historical batches for database replay",
     )
     args = parser.parse_args()
     manage.select_batch(args.batch)
-    asyncio.run(apply_batch(args.apply, args.approved_from))
+    asyncio.run(
+        apply_batch(
+            args.apply,
+            args.approved_from,
+            append=args.append,
+            base_batch=args.base_batch,
+            approved_batches=args.approved_batches,
+        )
+    )
 
 
 if __name__ == "__main__":

@@ -63,3 +63,27 @@ async def test_get_vector_context_happy_path_unaffected():
     assert len(result) == 1
     assert result[0]["content"] == "hello"
     assert result[0]["chunk_id"] == "chunk-1"
+
+
+async def test_vector_overfetch_separates_recall_from_final_chunk_limit(monkeypatch):
+    from unittest.mock import AsyncMock
+
+    monkeypatch.setenv("VECTOR_CHUNK_CANDIDATE_MULTIPLIER", "4")
+    vdb = _HitVDB()
+    vdb.query = AsyncMock(return_value=[])
+    param = QueryParam(chunk_top_k=12)
+    await _get_vector_context("京安心期满延续", vdb, param)
+    assert vdb.query.call_args.kwargs["top_k"] == 48
+    assert param.chunk_top_k == 12
+
+
+@pytest.mark.parametrize("value", ["0", "-1", "17"])
+async def test_invalid_overfetch_refused_before_vector_call(monkeypatch, value):
+    from unittest.mock import AsyncMock
+
+    monkeypatch.setenv("VECTOR_CHUNK_CANDIDATE_MULTIPLIER", value)
+    vdb = _HitVDB()
+    vdb.query = AsyncMock()
+    with pytest.raises(ValueError, match="MULTIPLIER"):
+        await _get_vector_context("query", vdb, QueryParam())
+    vdb.query.assert_not_awaited()

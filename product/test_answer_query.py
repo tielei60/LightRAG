@@ -1,4 +1,7 @@
-"""Natural model answers, real transport timing, and same-request citation bounds."""
+"""Private draft transport: streaming lifetime and citation bounds.
+
+Public delivery is separately covered by test_answer_audit.py.
+"""
 
 import asyncio
 import json
@@ -6,7 +9,13 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from product.answer_query import ANSWER_CONTRACT_VERSION, AnswerError, AnswerQuery
+from product.answer_query import (
+    ANSWER_CONTRACT_VERSION,
+    AnswerError,
+)
+from product.answer_query import (
+    _DraftAnswerQuery as AnswerQuery,
+)
 from product.test_grounded_query import native_prompt, wrapped
 
 

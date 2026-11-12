@@ -1,5 +1,6 @@
-import pytest
 from unittest.mock import patch
+
+import pytest
 
 from lightrag.base import QueryParam
 from lightrag.operate import _parse_keywords_payload, extract_keywords_only
@@ -172,3 +173,63 @@ async def test_extract_keywords_only_partitions_cache_by_keyword_llm_identity():
     assert second_ll == ["rag"]
     assert calls == 2
     assert len(cache._store) == 2
+
+
+@pytest.mark.offline
+@pytest.mark.asyncio
+@pytest.mark.parametrize("mode", ["local", "global", "hybrid", "mix"])
+@pytest.mark.parametrize("length", [49, 50, 53, 200])
+async def test_empty_keywords_still_build_context_for_every_query_length(mode, length):
+    from types import SimpleNamespace
+    from unittest.mock import AsyncMock
+
+    from lightrag.operate import kg_query
+
+    query = "问" * length
+    build = AsyncMock(return_value=SimpleNamespace(context="retrieved", raw_data={}))
+    config = {"role_llm_funcs": {"query": AsyncMock()}}
+    with (
+        patch("lightrag.operate.get_keywords_from_query", return_value=([], [])),
+        patch("lightrag.operate._build_query_context", build),
+    ):
+        result = await kg_query(
+            query,
+            None,
+            None,
+            None,
+            None,
+            QueryParam(mode=mode, only_need_context=True),
+            config,
+        )
+    assert result.content == "retrieved"
+    assert build.call_args.args[1] == ("" if mode == "global" else query)
+    assert build.call_args.args[2] == ("" if mode == "local" else query)
+    assert build.call_args.args[7].mode == mode
+
+
+@pytest.mark.offline
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "raw,valid",
+    [
+        ('{"high_level_keywords":[],"low_level_keywords":[]}', True),
+        ('{"wrong_field":[]}', False),
+        ('{"high_level_keywords":null,"low_level_keywords":{}}', False),
+        ("[]", False),
+    ],
+)
+async def test_failed_keyword_trace_preserves_raw_response_and_schema_state(raw, valid):
+    from unittest.mock import AsyncMock
+
+    with patch("lightrag.operate.logger.warning") as warning:
+        assert await extract_keywords_only(
+            "长问题" * 30,
+            QueryParam(),
+            _keyword_global_config("model", keyword_func=AsyncMock(return_value=raw)),
+        ) == ([], [])
+    trace = [
+        call for call in warning.call_args_list if "raw_response=%r" in call.args[0]
+    ]
+    assert len(trace) == 1
+    assert trace[0].args[2] is valid
+    assert trace[0].args[3] == raw

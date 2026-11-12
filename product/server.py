@@ -43,6 +43,7 @@ def main() -> None:
     # An answer-cache hit happens before the query callback. Every answer
     # must be generated from the current request's retrieved source context.
     os.environ["ENABLE_LLM_CACHE"] = "false"
+    os.environ.setdefault("VECTOR_CHUNK_CANDIDATE_MULTIPLIER", "4")
     from lightrag.api.lightrag_server import main as native_main
 
     native_main(role_llm_func_wrapper=wrap_query_role)

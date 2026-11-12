@@ -450,3 +450,143 @@ async def test_preview_rejects_invalid_profile_before_models_or_native_storage(
     with pytest.raises(ValueError, match="entity_types"):
         await apply_batch(False)
     assert not (tmp_path / "rag_storage").exists()
+
+
+@pytest.mark.asyncio
+async def test_incremental_shared_organization_merge_restores_prior_selected_evidence():
+    from product.evidence_extract import (
+        EvidenceChunk,
+        EvidenceUnit,
+        PointerResult,
+        to_native,
+    )
+    from product.evidence_import import incremental_replay_adapter
+
+    def evidence(product, filename, text):
+        unit = EvidenceUnit("e1", filename, 0, len(text), text)
+        chunk = EvidenceChunk(filename, product, text, (unit,))
+        selection = PointerResult.model_validate(
+            {
+                "entities": [
+                    {"name": "共同保险机构", "type": "机构", "evidence_ids": ["e1"]}
+                ],
+                "relationships": [],
+            }
+        )
+        return chunk, {
+            "selection": selection.model_dump(),
+            "native": to_native(selection, chunk),
+        }
+
+    old, old_row = evidence("产品甲", "旧原文.md", "产品甲由共同保险机构承保。")
+    new, new_row = evidence("产品乙", "新原文.md", "产品乙由共同保险机构承保。")
+
+    async def forbidden(*_args, **_kwargs):
+        raise AssertionError(
+            "Existing products and merge evidence must not call a model"
+        )
+
+    options = {
+        "requests": {"new prompt": new},
+        "native_system_prompt": "native system",
+        "native_summary_template": "{description_type}:{description_name}:{description_list}",
+        "type_guidance": "",
+        "selection_guidance": "",
+        "complete": forbidden,
+    }
+    adapter = incremental_replay_adapter(
+        options,
+        {"old prompt": old},
+        {digest("old prompt"): old_row},
+        {digest("new prompt"): new_row},
+    )
+    adapter.activate_sources([new.source])
+    result = await adapter(
+        "Entity:共同保险机构:"
+        + "\n".join(
+            json.dumps({"Description": chunk.units[0].text}, ensure_ascii=False)
+            for chunk in [old, new]
+        )
+    )
+    assert old.units[0].text in result
+    assert new.units[0].text in result
+    assert len(adapter.expected[("entity", "共同保险机构")]) == 2
+
+
+@pytest.mark.asyncio
+async def test_append_base_argument_cannot_silently_enable_overwriting():
+    from product.evidence_import import apply_batch
+
+    with pytest.raises(ValueError, match="explicit --append"):
+        await apply_batch(False, base_batch="existing")
+
+
+def test_multiple_approval_reuse_validates_exact_union_before_persisting(
+    tmp_path, monkeypatch
+):
+    import product.workspace_registry as registry
+    from product.evidence_extract import EvidenceChunk, EvidenceUnit
+    from product.evidence_import import reuse_approved_batches
+
+    requests, reviewed = {}, {}
+    for name, product in [("first", "产品甲"), ("second", "产品乙")]:
+        text = product + "：仅在完整条件下适用。"
+        unit = EvidenceUnit("e1", name + ".md", 0, len(text), text)
+        chunk = EvidenceChunk(name + ".md", product, text, (unit,))
+        prompt = name + " prompt"
+        requests[prompt] = chunk
+        reviewed[name] = SimpleNamespace(
+            requests={prompt: chunk},
+            selections={
+                digest(prompt): {
+                    "selection": {
+                        "entities": [
+                            {"name": "规则", "type": "合同规则", "evidence_ids": ["e1"]}
+                        ],
+                        "relationships": [],
+                    }
+                }
+            },
+        )
+    monkeypatch.setattr(
+        registry, "load_reviewed_batch", lambda _root, name: reviewed[name]
+    )
+    persisted = []
+    adapter = SimpleNamespace(
+        profile=None, persist_selection=lambda *args: persisted.append(args)
+    )
+    with pytest.raises(ValueError, match="union differs"):
+        reuse_approved_batches(adapter, requests, tmp_path, ["first"])
+    assert persisted == []
+    report = reuse_approved_batches(adapter, requests, tmp_path, ["first", "second"])
+    assert report["revalidated_chunks"] == 2 and report["provider_called"] is False
+    assert len(persisted) == 2
+    assert all(
+        "完整条件" in native["entities"][0]["description"] for _, _, native in persisted
+    )
+
+
+def test_multiple_approval_reuse_refuses_changed_source_identity(tmp_path, monkeypatch):
+    import product.workspace_registry as registry
+    from product.evidence_extract import EvidenceChunk, EvidenceUnit
+    from product.evidence_import import reuse_approved_batches
+
+    text = "产品甲：完整条件。"
+    old = EvidenceChunk(
+        "old.md", "产品甲", text, (EvidenceUnit("e1", "old.md", 0, len(text), text),)
+    )
+    new = EvidenceChunk(
+        "new.md", "产品甲", text, (EvidenceUnit("e1", "new.md", 0, len(text), text),)
+    )
+    monkeypatch.setattr(
+        registry,
+        "load_reviewed_batch",
+        lambda *_: SimpleNamespace(
+            requests={"prompt": old}, selections={digest("prompt"): {}}
+        ),
+    )
+    adapter = SimpleNamespace(
+        profile=None, persist_selection=lambda *_: pytest.fail("must not persist")
+    )
+    with pytest.raises(ValueError, match="identity differs"):
+        reuse_approved_batches(adapter, {"prompt": new}, tmp_path, ["base"])

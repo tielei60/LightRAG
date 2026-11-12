@@ -106,6 +106,29 @@ class ManifestTests(unittest.TestCase):
         with patch.object(manage, "MANIFEST", self.manifest):
             self.assertEqual(len(manage.checked_files()), 2)
 
+    def test_five_product_migration_uses_explicit_manifest_scope(self):
+        for index in (3, 4):
+            path = self.source / f"{index}.txt"
+            path.write_text(f"fixture-{index}")
+            self.entries.append(
+                {
+                    "product": f"fixture-{index}",
+                    "relative_path": path.name,
+                    "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+                }
+            )
+        self.manifest.write_text(
+            json.dumps(
+                {
+                    "source_root": str(self.source),
+                    "expected_product_count": 5,
+                    "documents": self.entries,
+                }
+            )
+        )
+        with patch.object(manage, "MANIFEST", self.manifest):
+            self.assertEqual(len(manage.checked_files()), 5)
+
     def test_prepared_input_tampering_is_rejected(self):
         payload = self.source.parent / "prepared.json"
         payload.write_text(json.dumps({"file_source": "0.txt", "text": "fixture"}))
@@ -167,7 +190,7 @@ class ServerLifecycleTests(unittest.TestCase):
         self.addCleanup(patcher.stop)
 
     def launch(self, grounded=None):
-        config = {"HOST": "127.0.0.1", "PORT": "9621"}
+        config = {"HOST": "127.0.0.1", "PORT": "9621", "WORKSPACE": "fixture"}
         if grounded is not None:
             config["PRODUCT_GROUNDED_QUERY"] = grounded
         with (
@@ -193,6 +216,15 @@ class ServerLifecycleTests(unittest.TestCase):
         )
         self.assertEqual(call.kwargs["env"]["PRODUCT_GROUNDED_QUERY"], "true")
         self.assertEqual(call.kwargs["cwd"], self.root)
+
+    def test_start_refuses_workspace_with_active_incremental_writer(self):
+        lock = self.root / "output/workspaces/fixture/writer.lock"
+        lock.parent.mkdir(parents=True)
+        lock.write_text('{"pid": 123}')
+        with self.assertRaisesRegex(ValueError, "writer reservation"):
+            self.launch("true")
+        self.assertFalse(self.pid_file.exists())
+        self.assertTrue(lock.exists())
 
     def test_stop_recognizes_product_bootstrap_and_keeps_pid_guard(self):
         self.pid_file.write_text("1234")

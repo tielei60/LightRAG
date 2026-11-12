@@ -1,22 +1,30 @@
 ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/..)
 PYTHON := $(ROOT)/.venv/bin/python
-BATCH ?= two-products-v5
+BATCH ?= master
+BASE_BATCH ?=
+APPROVED_FROM ?=
 
-.PHONY: start status stop preview import evidence-preview evidence-import verify qa
+.PHONY: start status stop preview import evidence-preview evidence-import append-preview append-import verify qa
 start status stop:
-	@$(PYTHON) $(ROOT)/product/manage.py --batch $(BATCH) $@
+	@cd "$(ROOT)" && "$(PYTHON)" -m product.manage --batch "$(BATCH)" $@
 
 preview:
-	@$(PYTHON) $(ROOT)/product/manage.py --batch $(BATCH) preview
+	@cd "$(ROOT)" && "$(PYTHON)" -m product.manage --batch "$(BATCH)" preview
 
 import:
-	@$(PYTHON) $(ROOT)/product/manage.py --batch $(BATCH) import
+	@cd "$(ROOT)" && "$(PYTHON)" -m product.manage --batch "$(BATCH)" import
 
 evidence-preview:
 	@cd "$(ROOT)" && "$(PYTHON)" -m product.evidence_import --batch "$(BATCH)"
 
 evidence-import:
 	@cd "$(ROOT)" && "$(PYTHON)" -m product.evidence_import --batch "$(BATCH)" --apply
+
+append-preview:
+	@cd "$(ROOT)" && "$(PYTHON)" -m product.evidence_import --batch "$(BATCH)" --append $(if $(BASE_BATCH),--base-batch "$(BASE_BATCH)") $(if $(APPROVED_FROM),--approved-from "$(APPROVED_FROM)")
+
+append-import:
+	@cd "$(ROOT)" && "$(PYTHON)" -m product.evidence_import --batch "$(BATCH)" --append --apply $(if $(BASE_BATCH),--base-batch "$(BASE_BATCH)") $(if $(APPROVED_FROM),--approved-from "$(APPROVED_FROM)")
 
 verify:
 	@cd "$(ROOT)" && "$(PYTHON)" -m product.verify_batch --batch "$(BATCH)" readback

@@ -11,6 +11,7 @@ import signal
 import subprocess
 import sys
 import time
+from contextlib import nullcontext
 from pathlib import Path
 
 import httpx
@@ -50,7 +51,7 @@ def checked_files() -> list[tuple[Path, dict]]:
     expected = manifest.get("expected_product_count", 3)
     if (
         type(expected) is not int
-        or expected not in (1, 2, 3)
+        or expected < 1
         or len({entry["product"] for entry in documents}) != expected
     ):
         raise ValueError("Product scope does not match the selected manifest")
@@ -102,16 +103,26 @@ def start() -> None:
         if grounded
         else [str(ROOT / ".venv/bin/lightrag-server")]
     )
-    with log_path.open("ab") as log:
-        process = subprocess.Popen(
-            command,
-            cwd=ROOT,
-            stdout=log,
-            stderr=subprocess.STDOUT,
-            start_new_session=True,
-            env=environment,
-        )
-    PID_FILE.write_text(str(process.pid))
+    from product.workspace_registry import workspace_writer
+
+    reservation = (
+        workspace_writer(ROOT, config["WORKSPACE"])
+        if config.get("WORKSPACE")
+        else nullcontext()
+    )
+    # Startup and SDK append use the same reservation. Publish the PID before
+    # releasing it, so a following append sees the newly running server.
+    with reservation:
+        with log_path.open("ab") as log:
+            process = subprocess.Popen(
+                command,
+                cwd=ROOT,
+                stdout=log,
+                stderr=subprocess.STDOUT,
+                start_new_session=True,
+                env=environment,
+            )
+        PID_FILE.write_text(str(process.pid))
     print(f"Started PID {process.pid}; log: {log_path.relative_to(ROOT)}")
 
 
@@ -227,7 +238,7 @@ def select_batch(batch: str) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--batch", default="first3")
+    parser.add_argument("--batch", default="master")
     parser.add_argument(
         "action", choices=["start", "status", "stop", "preview", "import"]
     )
@@ -244,6 +255,8 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    # Support direct script invocation as well as ``python -m product.manage``.
+    sys.path.insert(0, str(ROOT))
     try:
         main()
     except (OSError, ValueError, RuntimeError, KeyError, httpx.HTTPError) as exc:

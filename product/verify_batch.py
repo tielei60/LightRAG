@@ -8,6 +8,7 @@ Business correctness remains pending source-based review of the saved answers.
 from __future__ import annotations
 
 import argparse
+import asyncio
 import base64
 import hashlib
 import json
@@ -246,6 +247,28 @@ def verify_snapshot(batch: Path, storage: Path, embedding_dim: int) -> dict[str,
         "issues": issues,
         "business_acceptance": "pending: exact persistence does not establish semantic correctness",
     }
+
+
+def verification_source(root: Path, batch: Path, workspace: str) -> Path:
+    """Verify the accumulated workspace when incremental batches are registered."""
+    from product.workspace_registry import registry_path, workspace_snapshot
+
+    if registry_path(root, workspace).exists():
+        return workspace_snapshot(root, workspace)
+    return batch
+
+
+def verification_storage(root: Path, batch: Path, config: dict) -> Path:
+    """Read database backends independently; file exports are verification only."""
+    from product.database_storage import is_database_backend, snapshot_database_config
+
+    if is_database_backend(config):
+        return asyncio.run(
+            snapshot_database_config(
+                config, root, batch / "verification" / str(time.time_ns())
+            )
+        )
+    return Path(config["WORKING_DIR"]) / config["WORKSPACE"]
 
 
 @dataclass(frozen=True)
@@ -586,12 +609,18 @@ def main() -> None:
     if manifest["workspace"] != config["WORKSPACE"]:
         raise ValueError("Manifest and runtime workspace differ")
     if args.action == "readback":
+        source = verification_source(ROOT, batch, config["WORKSPACE"])
         report = verify_snapshot(
-            batch,
-            Path(config["WORKING_DIR"]) / config["WORKSPACE"],
+            source,
+            verification_storage(ROOT, batch, config),
             int(config["EMBEDDING_DIM"]),
         )
-        save_json(batch / "readback-report.json", report)
+        report_name = (
+            "workspace-readback-report.json"
+            if source != batch
+            else "readback-report.json"
+        )
+        save_json(batch / report_name, report)
         print(json.dumps(report, ensure_ascii=False, indent=2))
         if not report["passed"]:
             raise SystemExit(1)
