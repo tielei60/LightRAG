@@ -188,6 +188,12 @@ def source_answer_requirements(question, documents, history_messages=None):
     )
     basis_relevant = bool(re.search(r"累计|体检|财务|限额|门槛", question))
     surrender_relevant = bool(re.search(r"退保|解除(?:本)?合同", question))
+    survival_relevant = "生存保险金" in question and bool(
+        re.search(r"开始领|领到|领取时间|什么时候|何时|给付比例", question)
+    )
+    care_relevant = "护理状态" in question and bool(
+        re.search(r"相同|一样|不同|区别|差异|比较|具体要求", question)
+    )
     for reference, document in documents.items():
         product = document["product_name"]
         for index, excerpt in enumerate(document["excerpts"]):
@@ -203,6 +209,34 @@ def source_answer_requirements(question, documents, history_messages=None):
                 patterns.append(("free_look_definition", _FREE_LOOK))
             if surrender_relevant and product in requested:
                 patterns.append(("surrender_loss_warning", _LOSS_WARNING))
+                if re.search(
+                    r"手续|资料|材料|终止|时点|何时解除|什么时候解除", question
+                ):
+                    patterns.append(
+                        (
+                            "termination_event",
+                            r"自我们收到解除合同通知书时起[，,]本合同终止",
+                        )
+                    )
+            if survival_relevant and product in requested:
+                patterns.append(
+                    ("survival_condition", r"被保险人在每个保单周年日零时生存")
+                )
+            if care_relevant and product in requested:
+                patterns += [
+                    ("care_dependence", r"日常生活持续依赖他人监护和照顾"),
+                    (
+                        "irreversibility_definition",
+                        r"永久不可逆[：:]指自疾病确诊或意外伤害发生之日起[，,]经过积极治疗\d+天后[，,]仍无法通过现有医疗手段恢复",
+                    ),
+                ]
+            if (
+                product in requested
+                and "身故" in question
+                and re.search(r"计算|怎么算|公式|金额|给付|赔付", question)
+                and not re.search(r"增长因子|增长系数", question)
+            ):
+                patterns.append(("death_contract_termination", r"身故[，,]本合同终止"))
             if basis_relevant:
                 patterns.append(
                     ("cumulative_basis", r"累计[^。；\n]{0,70}[＝=][^。；\n]{0,140}")
@@ -286,7 +320,7 @@ def answer_requirement_conflicts(answer, requirements):
             if message not in conflicts:
                 conflicts.append(message)
     facts = requirements["source_facts"]
-    compact = _compact(answer)
+    compact = _compact(re.sub(r"[*_`]", "", answer))
     describes_phase = re.search(
         r"\d+周岁[^。；\n]{0,28}(?:身故|高度残疾|之前|之后|前|后|阶段)"
         r"|[缴交]费期满(?:前|后)"
@@ -333,9 +367,52 @@ def answer_requirement_conflicts(answer, requirements):
                 "答案重述基本保额增长公式时省略原文指数，不能将复利幂项缩成基本保额乘增长因子。"
             )
         if re.search(r"N[-−]1", compact) and not re.search(
-            r"N(?:为|是|代表|指|表示|=|:)|N[（(][^）)]{0,35}保单年度", compact
+            r"N(?:(?:的)?(?:含义|定义))?(?:为|是|代表|指|表示|=|:)[^。；]{0,40}保单年度"
+            r"|N[（(][^）)]{0,35}保单年度",
+            compact,
         ):
             conflicts.append("答案写出了含N的给付公式，却未交代原文明示的N含义。")
+    kinds = {row["kind"] for row in facts}
+    if "death_contract_termination" in kinds and not re.search(
+        r"合同(?:效力)?(?:即|随之|同时|相应|也|将|会|自动)?终止|终止(?:本)?合同",
+        compact,
+    ):
+        conflicts.append(
+            "身故保险金给付说明遗漏同次原文明示的本合同终止结果，须随该项给付说明一起交代。"
+        )
+    if "survival_condition" in kinds and not re.search(
+        r"(?:每个|各个|每一|每年)[^。；]{0,12}保单周年日(?:的)?(?:零时|零点|0:00|00:00)[^。；]{0,12}生存",
+        compact,
+    ):
+        conflicts.append(
+            "生存保险金给付须说明原文明示的被保险人在每个保单周年日零时生存条件。"
+        )
+    if "termination_event" in kinds and not re.search(
+        r"收到(?:您(?:的)?)?解除(?:本)?合同(?:的)?通知书[^。；]{0,30}(?:合同[^。；]{0,10}(?:终止|解除)|(?:终止|解除)[^。；]{0,10}合同)"
+        r"|合同[^。；]{0,10}(?:于|自|在)[^。；]{0,15}收到(?:您(?:的)?)?解除(?:本)?合同(?:的)?通知书[^。；]{0,10}(?:终止|解除)",
+        compact,
+    ):
+        conflicts.append(
+            "解除手续须说明保险公司收到解除合同通知书时合同终止，不能用退款时限替代终止时点。"
+        )
+    if "care_dependence" in kinds and not re.search(
+        r"(?:日常生活)?[^。；]{0,10}持续[^。；]{0,15}他人[^。；]{0,10}监护[^。；]{0,10}照顾",
+        compact,
+    ):
+        conflicts.append(
+            "护理状态比较遗漏原文明示的日常生活持续依赖他人监护和照顾条件。"
+        )
+    for fact in facts:
+        if fact["kind"] == "irreversibility_definition" and "永久不可逆" in compact:
+            days_match = re.search(r"(\d+)天", _compact(fact["text"]))
+            if days_match and not re.search(
+                rf"(?:治疗)[^。；]{{0,8}}{days_match[1]}(?:天|日)[^。；]{{0,35}}(?:恢复|不可逆)",
+                compact,
+            ):
+                conflicts.append(
+                    "护理状态中的永久不可逆须解释同次原文明示的起算事件、积极治疗期限及仍无法恢复的含义。"
+                )
+                break
     warned_products = {
         row["product_name"] for row in facts if row["kind"] == "surrender_loss_warning"
     }

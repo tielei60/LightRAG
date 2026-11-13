@@ -1,0 +1,33 @@
+{
+  "cases": [
+    {"id": "youhu-overview", "question": "京康优护有哪些保障计划，各计划包含哪些基本和可选保障责任？"},
+    {"id": "youhu-plan-one", "question": "京康优护计划一保哪些责任，包含住院津贴吗？"},
+    {"id": "youhu-plan-two", "question": "京康优护计划二与计划一相比多了什么，能否单独投保住院津贴？"},
+    {"id": "youhu-ratio", "question": "京康优护是不是所有医疗费用都固定按60%赔付？什么情况下涉及60%，这个比例的基数是什么？"},
+    {"id": "youhu-deductible", "question": "京康优护住院医疗和住院前后门急诊共用什么免赔额？这能否证明两项责任的等待期和延续保障规则也完全一样？"},
+    {"id": "youhu-underwriting", "question": "京康优护被保险人的投保年龄和保险期间是什么，是否涉及加费？"},
+    {"id": "antai-plans", "question": "京安泰有哪些投保计划，京安卡成人版和少儿版的航空意外保障有何差异？"},
+    {"id": "antai-selection", "question": "京安泰能否只选住院津贴、不选意外医疗？"},
+    {"id": "antai-underwriting", "question": "京安泰哪些公共核保规则不适用？这是否意味着产品自身职业和保额条件都不用满足？"},
+    {"id": "mixed-products", "question": "对比京安泰和京康优护：住院津贴分别属于什么保障，选择前提是什么？"},
+    {"id": "missing-evidence", "question": "京康优护投保五年后的现金价值具体是多少？"},
+    {"id": "jinganxin-plans-zero", "question": "京安心计划一和计划五都是不限定范围吗？计划五意外住院津贴为0，是否代表意外身故伤残、意外医疗和救护车费用也都不保？"},
+    {"id": "jinganxin-extension", "question": "京安心保险期满时意外治疗还没结束，门急诊和住院都能再保30天吗？这是否意味着整份合同所有责任都延长？"},
+    {"id": "mixed-death-scopes", "question": "京富守护星计划二和京富添利都是终身保险，身故保障规则是不是一样？请分别说明，不要把另一款产品的责任套过来。"},
+    {"id": "tianli-withdraw-surrender", "question": "京富添利第6个保单年度起部分领取费和退保费都为0%，是不是可以无条件随意领取？两种费用的计算基数一样吗？"},
+    {"id": "hongyu-dividend-vs-growth", "question": "京福宏裕（尊享版）的红利是不是保证每年都有？条款里的1.02^(N-1)能不能理解为所交保费每年保证赚2%？"},
+    {"id": "hongyu-dividend-options", "question": "京福宏裕（尊享版）有哪些红利领取方式？投保时没选会默认现金领取吗，后来变更会影响以前已分配的红利吗？"},
+    {"id": "hongyu-benefit-phases", "question": "京福宏裕（尊享版）的身故保险金和高度残疾保险金能分别各领一次吗？过了18周岁保单周年日，就一直按三项金额取最大吗？"},
+    {"id": "hongyu-age-payment", "question": "京福宏裕（尊享版）的70岁投保上限是否适用于所有交费年期？10年交和20年交分别最多几岁，期交还有什么年龄限制？"},
+    {"id": "hongyu-underwriting-boundary", "question": "京福宏裕（尊享版）18—40周岁累计同类应交总保费达到1500万元，就必须体检吗？公共体检和财务限额不适用，是否意味着所有公共核保规则都免了，也能健康或职业加费承保？"},
+    {"id": "mixed-hongyu-tianli-guarantee", "question": "京福宏裕（尊享版）的红利和京富添利的最低保证利率，是同一种保底收益吗？分别保证什么，能否把演示利益当作确定收益？"},
+    {"id": "yingjia-age-payment", "question": "京福盈嘉趸交、10年交和20年交的投保年龄上限分别是多少？最低保费及金额倍数有什么要求？"},
+    {"id": "yingjia-death-phases", "question": "京福盈嘉身故保险金什么时候按两项取大、什么时候按三项取大？各阶段比较的金额是什么？"},
+    {"id": "yingjia-mutual-exclusion", "question": "京福盈嘉的身故保险金和高度残疾保险金可以各领取一次吗？先给付其中一种后，合同还继续有效吗？"},
+    {"id": "mixed-yingjia-hongyu-growth", "question": "京福盈嘉和京福宏裕（尊享版）身故给付公式中的基本保额增长因子分别是什么？它们能否理解成保费或现金价值的保证收益率，宏裕的红利又是否保证？"},
+    {"id": "yingjia-surrender", "question": "京福盈嘉在犹豫期内和犹豫期后解除合同，分别退还什么？犹豫期后多久退还，会不会有损失？"},
+    {"id": "yingjia-underwriting-thresholds", "question": "60岁被保险人的同类险种累计应交总保费刚好1000万元，是否仅因达到该数额就必须体检？京福盈嘉的财务问卷门槛和累计口径又是什么？"},
+    {"id": "regression-jingantai-aviation-scope", "question": "京安泰京安卡成人版和少儿版的航空意外保障分别是多少？能否把成人版额度用于少儿版？"},
+    {"id": "regression-tianli-fee-bases", "question": "京富添利的部分领取费用和退保费用，计算基数相同吗？第1和第6保单年度的费率分别是多少？"}
+  ]
+}

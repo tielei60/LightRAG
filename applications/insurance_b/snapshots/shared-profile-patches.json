@@ -1,0 +1,13 @@
+{
+  "finding_id": "COMMON-APPLICATION-MATERIAL-002",
+  "change": "selection guidance only; no relaxed validator",
+  "additional_instruction": "投保时提交的申请书和缴费安排材料也按投保申请用途处理，包括抵交保费或关联保单所需申请书，不能仅因申请、保单、变更等字样归成保全材料。只有原文明示退保、复效、贷款、部分领取或合同变更等合同服务申请用途时才使用保全材料类型及其需要材料关系；不能为通过校验虚构退保或变更用途。未单列投保材料类型时，保留原文完整要求为投保规则或有依据的其他对象。",
+  "before_sha256": "6d24f3648179c790b9b2d684f41319abfcd302b94b63b61ff032847db977e574",
+  "after_sha256": "0c4f08c34af5ebe410baae6356fdce2cc841ded16f23f8ff640d4db118167502",
+  "A_live_profile_changed": false,
+  "applies_to": [
+    "a2",
+    "b1f2"
+  ],
+  "previous_patch": "shared-profile-patches-before-application-material.json"
+}

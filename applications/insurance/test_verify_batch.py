@@ -299,7 +299,11 @@ class ReadbackTests(unittest.TestCase):
         )
         report = self.report()
         self.assertEqual(
-            report["issues"], [f"entity_cross_product_source:{self.product}:{chunk_id}"]
+            report["issues"],
+            [
+                "graph_connectivity_failed:isolates_or_unreachable_product_nodes",
+                f"entity_cross_product_source:{self.product}:{chunk_id}",
+            ],
         )
 
     def test_unknown_graph_source_fails_attribution_check(self):

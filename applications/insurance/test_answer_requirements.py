@@ -312,3 +312,134 @@ def test_equivalent_maximum_phrasings_need_phase_but_pure_factor_does_not(wordin
         "盈嘉的基本保额增长因子为1.025，宏裕为1.02，不是保费或现金价值保证收益率。[1][3]",
         requirements,
     )
+
+
+def new_product_failures():
+    return json.loads(
+        (Path(__file__).parent / "fixtures/new_product_failures_v9.json").read_text()
+    )
+
+
+def test_actual_formatted_n_definition_is_not_a_missing_definition():
+    case = new_product_failures()[0]
+    requirements = source_answer_requirements(
+        case["question"], case["source_documents"]
+    )
+    assert not answer_requirement_conflicts(
+        case["answer"] + "本合同终止。", requirements
+    )
+    for definition in [
+        "**N 的含义**：指身故时所在的保单年度数",
+        "`N` 为身故时所在保单年度数",
+        "N（身故时所在保单年度数）",
+    ]:
+        assert not answer_requirement_conflicts(
+            "本合同终止。基本保险金额×1.02^(N-1)。" + definition, requirements
+        )
+    assert answer_requirement_conflicts(
+        "基本保险金额×1.02^(N-1)，N为未知参数。", requirements
+    )
+
+
+@pytest.mark.parametrize(
+    "case",
+    [
+        c
+        for c in new_product_failures()
+        if c["id"] in {"qizhou-02", "qizhou-04", "suiyue-02"}
+    ],
+    ids=lambda c: c["id"],
+)
+def test_actual_missing_conditions_fail_and_source_supported_completion_passes(case):
+    requirements = source_answer_requirements(
+        case["question"], case["source_documents"]
+    )
+    assert answer_requirement_conflicts(case["answer"], requirements)
+    supplements = {
+        "qizhou-02": "须被保险人在每个保单周年日零时生存。",
+        "qizhou-04": "自保险公司收到解除合同通知书时起，本合同终止。",
+        "suiyue-02": "日常生活持续依赖他人监护和照顾；永久不可逆指自疾病确诊或意外伤害发生日起，经过积极治疗180天后，仍无法通过现有医疗手段恢复。",
+    }
+    assert not answer_requirement_conflicts(
+        case["answer"] + supplements[case["id"]], requirements
+    )
+    for fact in requirements["source_facts"]:
+        assert (
+            fact["text"]
+            in case["source_documents"][fact["reference"]]["excerpts"][fact["excerpt"]][
+                "text"
+            ]
+        )
+
+
+def test_precision_requirements_are_not_invented_when_source_absent():
+    documents = {
+        "[1]": {
+            "product_name": "测试保险产品",
+            "excerpts": [{"text": "生存保险金按合同规定给付。"}],
+        }
+    }
+    requirements = source_answer_requirements(
+        "测试保险产品生存保险金怎么计算？护理状态要求？退保呢？", documents
+    )
+    assert not requirements["source_facts"]
+    assert not answer_requirement_conflicts("见合同。", requirements)
+
+
+@pytest.mark.parametrize(
+    "wording",
+    [
+        "自保险公司收到您解除合同的通知书时，本合同即被解除（终止）。",
+        "合同自保险公司收到解除合同通知书时终止。",
+        "自保险公司收到您的解除本合同的通知书时起，本合同终止。",
+    ],
+)
+def test_termination_event_accepts_equivalent_natural_wording(wording):
+    case = next(c for c in new_product_failures() if c["id"] == "qizhou-04")
+    requirements = source_answer_requirements(
+        case["question"], case["source_documents"]
+    )
+    assert not answer_requirement_conflicts(case["answer"] + wording, requirements)
+
+
+def test_death_formula_question_does_not_require_unasked_survival_schedule():
+    case = next(c for c in new_product_failures() if c["id"] == "qizhou-03")
+    requirements = source_answer_requirements(
+        case["question"], case["source_documents"]
+    )
+    assert "survival_condition" not in {f["kind"] for f in requirements["source_facts"]}
+
+
+def test_before_after_nursing_status_question_does_not_force_disease_group_expansion():
+    case = next(c for c in new_product_failures() if c["id"] == "suiyue-02")
+    requirements = source_answer_requirements(
+        "北京人寿京康岁悦长期护理保险已满足护理状态后，是否仍给付疾病身故保险金？",
+        case["source_documents"],
+    )
+    assert not {"care_dependence", "irreversibility_definition"} & {
+        f["kind"] for f in requirements["source_facts"]
+    }
+
+
+def test_source_explicit_death_termination_is_required_without_inventing_it():
+    case = new_product_failures()[0]
+    requirements = source_answer_requirements(
+        case["question"], case["source_documents"]
+    )
+    assert any(
+        "合同终止" in c
+        for c in answer_requirement_conflicts(case["answer"], requirements)
+    )
+    assert not answer_requirement_conflicts(
+        case["answer"] + "给付时本合同终止。[1]", requirements
+    )
+    requirements = source_answer_requirements(
+        "测试保险身故保险金怎么算？",
+        {
+            "[1]": {
+                "product_name": "测试保险",
+                "excerpts": [{"text": "身故保险金按现金价值给付。"}],
+            }
+        },
+    )
+    assert not answer_requirement_conflicts("按现金价值给付。[1]", requirements)

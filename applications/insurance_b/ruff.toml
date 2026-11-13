@@ -1,0 +1,7 @@
+extend = "../../pyproject.toml"
+target-version = "py312"
+extend-exclude = ["_frozen", "_current"]
+force-exclude = true
+
+[lint]
+extend-select = ["I"]

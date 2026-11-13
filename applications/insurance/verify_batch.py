@@ -150,6 +150,11 @@ def verify_snapshot(batch: Path, storage: Path, embedding_dim: int) -> dict[str,
             issues.append(f"chunk_document_missing:{chunk_id}")
 
     products = {entry["product"] for entry in documents}
+    from applications.insurance.graph_validation import graph_connectivity
+
+    connectivity = graph_connectivity(graph, products)
+    if not connectivity["passed"]:
+        issues.append("graph_connectivity_failed:isolates_or_unreachable_product_nodes")
 
     def product_of(name: str) -> str | None:
         return next(
@@ -245,6 +250,7 @@ def verify_snapshot(batch: Path, storage: Path, embedding_dim: int) -> dict[str,
         "chunks": len(chunks),
         "entities": graph.number_of_nodes(),
         "relationships": graph.number_of_edges(),
+        "connectivity": connectivity,
         "vectors": vector_counts,
         "issues": issues,
         "business_acceptance": "pending: exact persistence does not establish semantic correctness",

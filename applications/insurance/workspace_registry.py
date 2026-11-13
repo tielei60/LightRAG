@@ -236,6 +236,9 @@ def load_registered_batches(root: Path, workspace: str, base_batch: str | None =
                     "A registered batch storage backend or database was changed"
                 )
             batches.append(batch)
+        from applications.insurance.reviewed_repairs import apply_registered_repairs
+
+        apply_registered_repairs(root, registry, batches)
         return registry, batches
     if not base_batch:
         raise ValueError(

@@ -590,3 +590,31 @@ async def test_formula_conflict_can_be_repaired_after_false_positive_audit():
     answer = await AnswerQuery(provider)("基数一样吗？", system_prompt=context(source))
     assert answer.startswith(good)
     assert provider.await_count == 4
+
+
+@pytest.mark.asyncio
+async def test_false_pass_for_missing_required_condition_requests_concrete_repair():
+    source = "测试保险解除合同需填写解除合同通知书并提供合同和身份证件。自我们收到解除合同通知书时起，本合同终止。"
+    bad = "填写解除合同通知书并提供合同和身份证件。[1]"
+    good = "填写解除合同通知书并提供合同和身份证件；自我们收到解除合同通知书时起，本合同终止。[1]"
+    correction = {
+        **PASS,
+        "supported": False,
+        "issues": ["遗漏终止时点"],
+        "corrected_answer": good,
+    }
+    provider = provider_for(bad, [PASS.copy(), correction, PASS.copy()])
+    adapter = AnswerQuery(provider)
+    prompt = native_prompt(
+        [{"reference_id": "1", "content": wrapped(source, identity="测试保险")}]
+    )
+    stream = await adapter(
+        "测试保险解除合同需要什么手续？", system_prompt=prompt, stream=True
+    )
+    result = "".join([part async for part in stream])
+    assert result.startswith(good)
+    requests = [json.loads(c.args[0]) for c in provider.call_args_list[1:]]
+    assert requests[1]["validation_feedback"]["unresolved_requirements"]
+    assert "corrected_answer" in requests[1]["validation_feedback"]["instruction"]
+    assert requests[-1]["answer"] == good
+    assert requests[-1]["detected_answer_requirement_conflicts"] == []

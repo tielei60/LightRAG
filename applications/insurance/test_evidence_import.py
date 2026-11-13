@@ -86,12 +86,20 @@ def native_files(tmp_path):
     )
     graph = nx.Graph()
     graph.add_node(entity_name, description=body, source_id="chunk-1")
+    root = "产品甲"
+    native["entities"].append({"name": root, "type": "保险产品", "description": root})
+    native["relationships"].append(
+        {"source": root, "target": entity_name, "description": body}
+    )
+    graph.add_node(root, description=root, source_id="chunk-1")
+    graph.add_edge(root, entity_name, description=body, source_id="chunk-1")
     nx.write_graphml(graph, tmp_path / "graph_chunk_entity_relation.graphml")
     for name, rows in {
         "entities": [
-            {"entity_name": entity_name, "content": entity_name + "\n" + body}
+            {"entity_name": entity_name, "content": entity_name + "\n" + body},
+            {"entity_name": root, "content": root + "\n" + root},
         ],
-        "relationships": [],
+        "relationships": [{"src_id": root, "tgt_id": entity_name, "content": body}],
         "chunks": [{"__id__": "chunk-1", "content": body}],
     }.items():
         (tmp_path / f"vdb_{name}.json").write_text(json.dumps({"data": rows}))
@@ -104,7 +112,7 @@ def test_closed_readback_verifies_native_chunks_graph_and_vectors(tmp_path):
     assert report["technical_passed"]
     assert report["processed_documents"] == 1
     assert report["chunks"] == 1
-    assert report["entities"] == 1
+    assert report["entities"] == 2
     assert report["business_acceptance"].startswith("pending")
 
 
@@ -815,3 +823,16 @@ def test_multiple_approval_reuse_refuses_changed_source_identity(tmp_path, monke
     )
     with pytest.raises(ValueError, match="identity differs"):
         reuse_approved_batches(adapter, {"prompt": new}, tmp_path, ["base"])
+
+
+def test_closed_readback_rejects_disconnected_graph_even_when_approval_agrees(tmp_path):
+    documents, approved = native_files(tmp_path)
+    approved["prompt"]["native"]["relationships"] = []
+    graph_path = tmp_path / "graph_chunk_entity_relation.graphml"
+    graph = nx.read_graphml(graph_path)
+    graph.remove_edges_from(list(graph.edges))
+    nx.write_graphml(graph, graph_path)
+    (tmp_path / "vdb_relationships.json").write_text(json.dumps({"data": []}))
+    report = readback_files(tmp_path, documents, approved)
+    assert not report["technical_passed"]
+    assert not report["connectivity"]["passed"]

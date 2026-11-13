@@ -1,0 +1,12 @@
+{
+  "finding_id": "COMMON-UNDERWRITING-MATERIAL-001",
+  "change": "shared selection guidance only; no native prompt, scope validator, entity taxonomy or source facts changed",
+  "added_instruction": "材料须按原文明示的申请用途分类。投保、承保或核保时提交的财务问卷、收入资产证明、体检资料属于核保要求，不是保险事故理赔或合同服务保全。当前类型未单列核保材料时，将该完整提交要求保留为投保规则（或原文支持的其他对象），不得套用理赔材料、保全材料及其需要材料关系；不要删除原文明示的资料、金额门槛或累计条件。",
+  "before_sha256": "1cfe749ec2295a404b1bd010777dc970ce7a659eae8b00e8da55d23a5f244f81",
+  "after_sha256": "6d24f3648179c790b9b2d684f41319abfcd302b94b63b61ff032847db977e574",
+  "applies_to": [
+    "a1",
+    "b1r3"
+  ],
+  "A_live_profile_changed": false
+}

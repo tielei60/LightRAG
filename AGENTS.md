@@ -157,6 +157,21 @@ The offline remedy for a document with no proof is `audit_kg_integrity(..., appl
 
 ## Development Commands
 
+### Insurance import acceptance
+
+For `applications/insurance`, every import and repair must verify the complete
+persisted graph, not only the WebUI's bounded graph response. Report degree-zero
+nodes, connected-component sizes, rootless components, and nodes unreachable
+from their own product within that product's scope. Two nodes connected only to
+each other are still an island. Separate valid product components need not be
+artificially joined. Acceptance fails if any product-owned node is unreachable.
+Run the same connectivity check on the complete batch of approved extraction
+before writing and on the accumulated database/file readback. Never invent edges to satisfy it:
+review original evidence, and synchronize extraction caches, vectors, chunk
+tracking and document recovery anchors when repairing an existing graph.
+Preserve original batch approvals; register verified source-pointer corrections
+as hashed overlays so later incremental imports replay the repaired state.
+
 ### Setup
 ```bash
 # Install with uv

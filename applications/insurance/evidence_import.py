@@ -329,6 +329,13 @@ def readback_files(
         for name in ("entities", "relationships", "chunks")
     }
     errors = []
+    from applications.insurance.graph_validation import graph_connectivity
+
+    connectivity = graph_connectivity(
+        graph, [entry["product"] for entry, _ in documents if "product" in entry]
+    )
+    if not connectivity["passed"]:
+        errors.append("Graph connectivity failed: isolated or unreachable product nodes")
     native_labels = [
         normalize_document_file_path(entry["ingestion_label"]) for entry, _ in documents
     ]
@@ -445,6 +452,7 @@ def readback_files(
         "chunks": len(chunks),
         "entities": graph.number_of_nodes(),
         "relationships": graph.number_of_edges(),
+        "connectivity": connectivity,
         "vectors": {name: len(rows) for name, rows in vector_rows.items()},
         "vector_content_verification": {
             "policy": "exact native entity content with configured token bound"
@@ -865,6 +873,16 @@ async def _apply_batch(
         approval_adapter, requests, int(config["EXTRACT_MAX_ASYNC_LLM"])
     )
     validate_native_identities(approved)
+    from applications.insurance.graph_validation import approved_connectivity
+
+    connectivity = approved_connectivity(
+        approved, [entry["product"] for entry, _ in documents]
+    )
+    manage.save_json(manage.OUTPUT / "preflight-connectivity.json", connectivity)
+    if not connectivity["passed"]:
+        raise ValueError(
+            "Approved graph has isolated or unreachable product nodes; review source-supported relations before writing"
+        )
     manage.save_json(
         manage.OUTPUT / "approved-extractions.json",
         {

@@ -1,0 +1,91 @@
+{
+  "contract_modules": {
+    "evidence_extract": {
+      "source_sha256": "7d18052cdc099b0e9648d9fd843d7b768f945ad709bed5d0ac53aec52a4173cf",
+      "frozen_sha256": "6b6a8f7aedf655dd856b8428f38e4dfe42380efcc3fe396930b5848e249dda84"
+    },
+    "evidence_semantics": {
+      "source_sha256": "4e8bc7b43b6fecb29cbb0241d49aafdaccf50daeb6ef346f2d3b86a241315ae5",
+      "frozen_sha256": "4e8bc7b43b6fecb29cbb0241d49aafdaccf50daeb6ef346f2d3b86a241315ae5"
+    },
+    "extraction_profile": {
+      "source_sha256": "2872029f09641e06ab7e3c1458105ea3a9e0948173b175aff67758ac4a06bb1d",
+      "frozen_sha256": "a958e530c85a74d73e251124a25912bcef54664b4819f357777cf3e6bb9a1131"
+    },
+    "answer_query": {
+      "source_sha256": "e2c42b8ab786e5791d743ca641a0d3d05ae88abde731e7c845971b8c87933371",
+      "frozen_sha256": "71901808f8fdd6c326a05d0e4200fa9f333009cae3c994ecf81b0fef9de95859"
+    },
+    "answer_audit": {
+      "source_sha256": "9a3dea83108ed2c6f7526ca2274cc2604a3dd84436189885ef169c2981b20f89",
+      "frozen_sha256": "96179e233f768c8348d0b0b9fdf7ef988a73f84d9acab56fc4bb5fd26bbb3701"
+    },
+    "answer_requirements": {
+      "source_sha256": "8751f2cccd4bbdce9c0b844edb0bf6aaac80408692fa7c2b92b224f7f33727d3",
+      "frozen_sha256": "8751f2cccd4bbdce9c0b844edb0bf6aaac80408692fa7c2b92b224f7f33727d3"
+    },
+    "grounded_query": {
+      "source_sha256": "1f08b866c0dd2f82c2eadf9fafaae3c340a912e1bdd65fb921a14c96ef43d47a",
+      "frozen_sha256": "1f08b866c0dd2f82c2eadf9fafaae3c340a912e1bdd65fb921a14c96ef43d47a"
+    },
+    "source_scope": {
+      "source_sha256": "adf67e0d6d9b594d97c52cd402986525a505854bdd8b748d38441c6afbca1f68",
+      "frozen_sha256": "adf67e0d6d9b594d97c52cd402986525a505854bdd8b748d38441c6afbca1f68"
+    },
+    "formula_consistency": {
+      "source_sha256": "d8cb5aaea5d866cba3f491de1897c8bd0cbfeba790786eb582b3361ed1ee9bc1",
+      "frozen_sha256": "d8cb5aaea5d866cba3f491de1897c8bd0cbfeba790786eb582b3361ed1ee9bc1"
+    }
+  },
+  "profiles": {
+    "user_prompt/products.md": "dd1ddc142829093e38328c7cdd54d33d68c25f97f3fa35200e8548c99baec296",
+    "entity_type/products.yml": "1cfe749ec2295a404b1bd010777dc970ce7a659eae8b00e8da55d23a5f244f81"
+  },
+  "a_code_hashes": {
+    "applications/insurance/evidence_extract.py": "7d18052cdc099b0e9648d9fd843d7b768f945ad709bed5d0ac53aec52a4173cf",
+    "applications/insurance/database_storage.py": "fdb64edd8af90a7a32503f47cef96490a0c286ab38665598607dab0862951608",
+    "applications/insurance/evidence_import.py": "c312876ad190022e732d50f9ae43ccf551fabb50b83c7310b07301061a98e3c0",
+    "applications/insurance/classification_repair.py": "edd544aba306391d0c8d934fcd65173b89dda69675699bdfc518bf4bb7cbbb66",
+    "applications/insurance/prepare_batch.py": "c3f66682fbec453bcffcaba6445479a88aeef3395394479430cd98d2082761d1",
+    "applications/insurance/test_verify_batch.py": "9c244a6878990fe421273913bf1f8fcb7c08a7c9c57b90a3f0b20eae4dc95a52",
+    "applications/insurance/server.py": "a72211467a7b182d430787d756f761e67c00715c7762bed2d84a0fec32282c98",
+    "applications/insurance/evidence_semantics.py": "4e8bc7b43b6fecb29cbb0241d49aafdaccf50daeb6ef346f2d3b86a241315ae5",
+    "applications/insurance/test_query_trace.py": "73920fdf6e3ce2ef715b4cd0eede69c5e8d93e7d5332f52da5a18f665486adfd",
+    "applications/insurance/test_prepare_batch.py": "5339494a8fb9ccd53c6e88333bd31825138d0d252e12e6bc37d139c171604b84",
+    "applications/insurance/prepare_context.py": "21bb794545f55412b6d8e3d597a23a0b35c42ba0759cc39c7b4bdd9aa35c9791",
+    "applications/insurance/paths.py": "abfad8a9ba46e61441d1fc3cf554b33ef9e8c4c6f00f66e4dc4408ed45779876",
+    "applications/insurance/test_answer_requirements.py": "d72c5d8bf44fb1a89991937a7800a939ce11fc972bf7a8cda2d0a71d5dad1497",
+    "applications/insurance/test_manage.py": "71ce8962271145f30084fbd3adf93234c51b874736f9e3381b954f815e3270d1",
+    "applications/insurance/answer_audit.py": "9a3dea83108ed2c6f7526ca2274cc2604a3dd84436189885ef169c2981b20f89",
+    "applications/insurance/source_scope.py": "adf67e0d6d9b594d97c52cd402986525a505854bdd8b748d38441c6afbca1f68",
+    "applications/insurance/extraction_profile.py": "2872029f09641e06ab7e3c1458105ea3a9e0948173b175aff67758ac4a06bb1d",
+    "applications/insurance/workspace_registry.py": "6a2e856f22267d5a1c4ae80b287e161db50078da93eb60a68e164ea08b5225a9",
+    "applications/insurance/answer_query.py": "e2c42b8ab786e5791d743ca641a0d3d05ae88abde731e7c845971b8c87933371",
+    "applications/insurance/query_trace.py": "4789db7a0da0277c8e33846badafec8763f5c95a6dc7fbcc8bc0507ea5a9ed72",
+    "applications/insurance/answer_requirements.py": "8751f2cccd4bbdce9c0b844edb0bf6aaac80408692fa7c2b92b224f7f33727d3",
+    "applications/insurance/__init__.py": "98b4e561f9c1e2376c33cdb4c25f698299770794614919dcbcfada40a77936e3",
+    "applications/insurance/grounded_query.py": "1f08b866c0dd2f82c2eadf9fafaae3c340a912e1bdd65fb921a14c96ef43d47a",
+    "applications/insurance/test_migration_contract.py": "d00706d66a3dd48bcfe0d5a91937dcc5d33b91738d486d993fe3f6b945898d85",
+    "applications/insurance/test_prepare_context.py": "a34677804cc7ef9257ddba3e2513978162e2eab175b2564135ff762573f4d585",
+    "applications/insurance/test_answer_query.py": "bc465f1a79f71fcac4cb5f67a77bcfb8377fdcc7d89d7c173af582220833dd22",
+    "applications/insurance/formula_consistency.py": "d8cb5aaea5d866cba3f491de1897c8bd0cbfeba790786eb582b3361ed1ee9bc1",
+    "applications/insurance/test_extraction_profile.py": "a23ec990fa712432a091ad81b4697af97f545212a353ca44b226b5c0df054b3a",
+    "applications/insurance/test_answer_audit.py": "e2e208d4e78973c28b70d56ac8532ac3da83d6659c44fb005047263a57416fc8",
+    "applications/insurance/test_source_scope.py": "9877c62c35ebb9d555b42f71039f224d6ac5e68ae170fffd4e02f2e4b7713ffb",
+    "applications/insurance/test_workspace_registry.py": "6cb27e8d1ea8319c6df568d3e903a21b9bef4a8890f2ca471495304469caa3b9",
+    "applications/insurance/test_evidence_provider_ids.py": "7c81c94d83ea52a7ee4bed4b9e290e9e8800c3a426b5f3514949a8ac491fa040",
+    "applications/insurance/test_evidence_import.py": "5576035c5aa258b4ff31a065ee28f96f1ff47c8d23fa18db63433598b82f31f1",
+    "applications/insurance/test_grounded_query.py": "930ccac2b44ddbfc9ea30efb65c5e683e2121f585e40a85818d782d78646a6ac",
+    "applications/insurance/test_extraction_examples.py": "a5bcab554f38ee5792640fb8f1e3c513ebddc8e94725dd6a00551b56e638484c",
+    "applications/insurance/manage.py": "5305c3f62816021e280cfde2fb72019cda4f5e3511530f1aab81f45c339c56b0",
+    "applications/insurance/test_package_migration.py": "efe650f97e048e0b82cf0432ccbefd2221ad20741830a19ea3de545cad9826b4",
+    "applications/insurance/test_database_storage.py": "4aeedb471a418b1b7977ee1a6efcd2ab22d3c639847e983bf5888772782fef66",
+    "applications/insurance/test_formula_consistency.py": "c62a65f1cb25890f8bdcd25c7d0fc86fddd682bec41b22a74e9ce1d0f2b0707d",
+    "applications/insurance/verify_batch.py": "cdd47ffd49b3b58de4f4fee6d0cb583666a5e1412ccfc1a29edb8ea8dbfc88ad",
+    "applications/insurance/test_classification_repair.py": "b82c7332b3b2f0b67a2a3a8cf11155be47a4adced2be17f32951ac89006748c9",
+    "applications/insurance/test_evidence_extract.py": "c2e334489825d1136c72fb0cc2a7ab57c2b11540e05e72492ae8e6d283a106ba",
+    "applications/insurance/test_evidence_semantics.py": "59840846d4627de0ffa3540aa1bbfc08b3d43bcd26fe83e26ff32479ff1887e2"
+  },
+  "a_registry_sha256": "5a503fedae1a1b632eaa72471106f06a24eba66b53a541673acc1ee9151edda5",
+  "source_document": "/Users/tielei/Downloads/LightRAG_1.5.7_B方案与AB测试设计.md"
+}
