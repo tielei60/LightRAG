@@ -7,6 +7,7 @@ import networkx as nx
 import pytest
 
 from applications.insurance.evidence_import import (
+    EvidenceReplayCache,
     approve_extractions,
     digest,
     readback_files,
@@ -129,6 +130,79 @@ def test_readback_refuses_unknown_graph_source_and_missing_chunk_vector(tmp_path
     assert not report["technical_passed"]
     assert any("Chunk vectors" in error for error in report["errors"])
     assert any("provenance" in error for error in report["errors"])
+
+
+def bounded_native_files(tmp_path):
+    from lightrag.utils import TiktokenTokenizer
+
+    documents, approved = native_files(tmp_path)
+    tokenizer = TiktokenTokenizer()
+    limit = 12
+    vector_path = tmp_path / "vdb_entities.json"
+    vectors = json.loads(vector_path.read_text())
+    full_content = vectors["data"][0]["content"]
+    span = tokenizer.truncate_by_token_limit(full_content, limit)
+    assert span.end < len(full_content)
+    vectors["data"][0]["content"] = full_content[span.start : span.end]
+    vector_path.write_text(json.dumps(vectors))
+    return documents, approved, tokenizer, limit
+
+
+def test_readback_accepts_only_exact_native_bounded_vector_content(tmp_path):
+    documents, approved, tokenizer, limit = bounded_native_files(tmp_path)
+    report = readback_files(
+        tmp_path, documents, approved, embedding_token_limit=limit, tokenizer=tokenizer
+    )
+    assert report["technical_passed"], report["errors"]
+    verification = report["vector_content_verification"]
+    assert verification["bounded_entity_count"] == 1
+    bounded = verification["bounded_entities"][0]
+    assert bounded["graph_content_tokens"] > limit
+    assert bounded["vector_content_tokens"] <= limit
+
+    vector_path = tmp_path / "vdb_entities.json"
+    vectors = json.loads(vector_path.read_text())
+    vectors["data"][0]["content"] = vectors["data"][0]["content"][:-1]
+    vector_path.write_text(json.dumps(vectors))
+    report = readback_files(
+        tmp_path, documents, approved, embedding_token_limit=limit, tokenizer=tokenizer
+    )
+    assert not report["technical_passed"]
+    assert any(
+        "Entity vector lost native bounded content" in error
+        for error in report["errors"]
+    )
+
+
+@pytest.mark.parametrize("damage", ["graph_evidence", "provenance"])
+def test_bounded_vector_does_not_waive_graph_evidence_or_provenance(tmp_path, damage):
+    documents, approved, tokenizer, limit = bounded_native_files(tmp_path)
+    graph_path = tmp_path / "graph_chunk_entity_relation.graphml"
+    graph = nx.read_graphml(graph_path)
+    node = graph.nodes["产品甲｜规则"]
+    if damage == "graph_evidence":
+        node["description"] = node["description"].replace("；丙除外", "")
+        # Keep even the damaged graph's vector exactly consistent. The full
+        # approved graph-evidence guard must independently reject this loss.
+        content = "产品甲｜规则\n" + node["description"]
+        span = tokenizer.truncate_by_token_limit(content, limit)
+        vector_path = tmp_path / "vdb_entities.json"
+        data = json.loads(vector_path.read_text())
+        data["data"][0]["content"] = content[span.start : span.end]
+        vector_path.write_text(json.dumps(data))
+    else:
+        node["source_id"] = "lost-chunk"
+    nx.write_graphml(graph, graph_path)
+    report = readback_files(
+        tmp_path, documents, approved, embedding_token_limit=limit, tokenizer=tokenizer
+    )
+    assert not report["technical_passed"]
+    expected = (
+        "Graph entity lost approved evidence"
+        if damage == "graph_evidence"
+        else "provenance"
+    )
+    assert any(expected in error for error in report["errors"])
 
 
 def test_readback_accepts_evidence_reordered_by_original_source_position(tmp_path):
@@ -515,6 +589,153 @@ async def test_incremental_shared_organization_merge_restores_prior_selected_evi
     assert old.units[0].text in result
     assert new.units[0].text in result
     assert len(adapter.expected[("entity", "共同保险机构")]) == 2
+
+
+@pytest.mark.asyncio
+async def test_summary_cache_cannot_replace_active_evidence_after_empty_native_prompt():
+    from applications.insurance.evidence_extract import (
+        EvidenceChunk,
+        EvidenceUnit,
+        PointerResult,
+        to_native,
+    )
+    from applications.insurance.evidence_import import incremental_replay_adapter
+    from lightrag.operate import _summarize_descriptions
+    from lightrag.prompt import PROMPTS
+    from lightrag.utils import TiktokenTokenizer, use_llm_func_with_cache
+
+    class Storage:
+        def __init__(self):
+            self.global_config = {"enable_llm_cache_for_entity_extract": True}
+            self.rows = {}
+            self.lifecycle = []
+
+        async def get_by_id(self, key):
+            return self.rows.get(key)
+
+        async def get_by_ids(self, keys):
+            return [self.rows.get(key) for key in keys]
+
+        async def upsert(self, data):
+            self.rows.update(data)
+
+        async def initialize(self):
+            self.lifecycle.append("initialize")
+
+        async def finalize(self):
+            self.lifecycle.append("finalize")
+
+    def evidence(product, source):
+        text = product + "由共同保险机构承保。完整条件必须保留。"
+        unit = EvidenceUnit("e1", source, 0, len(text), text)
+        chunk = EvidenceChunk(source, product, text, (unit,))
+        selection = PointerResult.model_validate(
+            {
+                "entities": [
+                    {"name": "共同保险机构", "type": "机构", "evidence_ids": ["e1"]}
+                ],
+                "relationships": [],
+            }
+        )
+        return chunk, {
+            "selection": selection.model_dump(),
+            "native": to_native(selection, chunk),
+        }
+
+    old, old_row = evidence("产品甲", "旧原文.md")
+    new, new_row = evidence("产品乙", "新原文.md")
+
+    async def no_provider(*_args, **_kwargs):
+        raise AssertionError("Merge must replay evidence without a model call")
+
+    events = []
+    adapter = incremental_replay_adapter(
+        {
+            "requests": {"new": new},
+            "native_system_prompt": "native system",
+            "native_summary_template": PROMPTS["summarize_entity_descriptions"],
+            "type_guidance": "",
+            "selection_guidance": "",
+            "complete": no_provider,
+            "record": events.append,
+        },
+        {"old": old},
+        {digest("old"): old_row},
+        {digest("new"): new_row},
+    )
+    storage = Storage()
+    cache = EvidenceReplayCache(storage)
+    config = {
+        "role_llm_funcs": {"extract": adapter},
+        "summary_length_recommended": 10,
+        "summary_context_size": 1,
+        "tokenizer": TiktokenTokenizer(),
+    }
+    await cache.initialize()
+    first = await _summarize_descriptions(
+        "Entity", "共同保险机构", [old.content], config, cache
+    )
+    adapter.activate_sources([new.source])
+    second = await _summarize_descriptions(
+        "Entity", "共同保险机构", [old.content, new.content], config, cache
+    )
+    assert first == old.content
+    assert old.content in second and new.content in second
+    assert len(events) == 2
+    assert all(event["input_descriptions"] == [] for event in events)
+    assert (
+        len(storage.rows) == 1
+    )  # Identical empty prompt/cache key, different active scopes.
+    summary_key = next(iter(storage.rows))
+    assert summary_key.startswith("default:summary:")
+    assert storage.rows[summary_key]["return"] == second
+    assert await cache.get_by_id(summary_key) is None
+
+    extraction_calls = []
+
+    async def extract(*_args, **_kwargs):
+        extraction_calls.append(True)
+        return "approved extraction"
+
+    for _ in range(2):
+        result, _timestamp = await use_llm_func_with_cache(
+            "extract prompt", extract, cache, cache_type="extract"
+        )
+        assert result == "approved extraction"
+    assert len(extraction_calls) == 1
+    extract_key = next(
+        key for key in storage.rows if key.startswith("default:extract:")
+    )
+    assert await cache.get_by_id(extract_key) == storage.rows[extract_key]
+    assert await cache.get_by_ids([extract_key]) == [storage.rows[extract_key]]
+    await cache.finalize()
+    assert storage.lifecycle == ["initialize", "finalize"]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("failed_ingestion", [False, True])
+async def test_merge_cache_scope_restores_summary_rows_for_strict_database_export(
+    tmp_path, failed_ingestion
+):
+    from applications.insurance.database_storage import capture_database_snapshot
+    from applications.insurance.evidence_import import replay_merge_cache
+    from applications.insurance.test_database_storage import snapshot_fixture
+
+    rag, _queries = snapshot_fixture()
+    original = rag.llm_response_cache
+    summary = {"cache_type": "summary", "return": "complete active evidence"}
+    original.get_by_id.return_value = summary
+    try:
+        with replay_merge_cache(rag):
+            assert await rag.llm_response_cache.get_by_id("summary-id") is None
+            if failed_ingestion:
+                raise RuntimeError("ingestion failed")
+    except RuntimeError:
+        assert failed_ingestion
+    assert rag.llm_response_cache is original
+    snapshot = await capture_database_snapshot(rag, tmp_path / "after-ingestion")
+    rows = json.loads((snapshot / "kv_store_llm_response_cache.json").read_text())
+    assert rows["llm_response_cache-id"] == summary
 
 
 @pytest.mark.asyncio

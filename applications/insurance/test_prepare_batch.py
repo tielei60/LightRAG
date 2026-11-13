@@ -408,7 +408,7 @@ class BatchTests(unittest.TestCase):
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory()
         self.addCleanup(self.directory.cleanup)
-        self.root = Path(self.directory.name)
+        self.root = Path(self.directory.name).resolve()
         self.sources = self.root / "sources"
         self.sources.mkdir()
         self.config = self.root / ".env"
@@ -480,6 +480,66 @@ class BatchTests(unittest.TestCase):
         self.build()
         with self.assertRaisesRegex(ValueError, "already exists"):
             self.build()
+
+    def test_pdf_underwriting_preserves_original_paths_and_hashes(self):
+        for name, suffix in (
+            ("甲", "投核保规则.pdf"),
+            ("乙", "投保及核保规则-OA.pdf"),
+        ):
+            with self.subTest(suffix=suffix):
+                source = self.sources / name / f"测试{name}保险投保及核保规则.md"
+                target = source.with_name(f"测试{name}保险{suffix}")
+                source.rename(target)
+                originals = {
+                    path: path.read_bytes()
+                    for path in (self.sources / name).iterdir()
+                    if path.is_file()
+                }
+                batch = f"pdf-{len(suffix)}"
+                manifest = prepare_batch.build_batch(
+                    batch,
+                    [name],
+                    "products_two",
+                    source_root=self.sources,
+                    config_path=self.config,
+                )
+                entry = next(
+                    row
+                    for row in manifest["documents"]
+                    if row["document_role"] == "underwriting"
+                )
+                self.assertEqual(entry["relative_path"], f"{name}/{target.name}")
+                self.assertEqual(
+                    entry["ingestion_label"], f"sources/{name}/{target.name}"
+                )
+                self.assertEqual(entry["sha256"], prepare_batch.digest(originals[target]))
+                output = self.root / "output" / batch
+                payload = json.loads((output / entry["prepared_path"]).read_text())
+                source_map = json.loads((output / entry["source_map_path"]).read_text())
+                self.assertEqual(payload["file_source"], target.name)
+                self.assertEqual(source_map["source_sha256"], entry["sha256"])
+                self.assertEqual(source_map["parser"], "pypdf page.extract_text")
+                self.assertEqual(source_map["chunks"][0]["physical_pages"], [1])
+                frozen_manifest = (output / "manifest.json").read_bytes()
+                with self.assertRaisesRegex(ValueError, "already exists"):
+                    prepare_batch.build_batch(
+                        batch,
+                        [name],
+                        "products_two",
+                        source_root=self.sources,
+                        config_path=self.config,
+                    )
+                self.assertEqual((output / "manifest.json").read_bytes(), frozen_manifest)
+                self.assertEqual(
+                    {path: path.read_bytes() for path in originals}, originals
+                )
+
+    def test_multiple_underwriting_representations_are_rejected(self):
+        original = self.sources / "甲" / "测试甲保险投保及核保规则.md"
+        original.with_suffix(".pdf").write_bytes(original.read_bytes())
+        with self.assertRaisesRegex(ValueError, "required document role"):
+            self.build()
+        self.assertFalse((self.root / "output/two").exists())
 
     def test_existing_workspace_requires_explicit_incremental_mode(self):
         (self.root / "rag_storage/products_two").mkdir(parents=True)

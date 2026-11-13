@@ -557,7 +557,7 @@ def discover(source_root: Path, folders: list[str]) -> tuple[list[dict], list[di
             "underwriting": [
                 p
                 for p in files
-                if p.suffix.lower() == ".md"
+                if p.suffix.lower() in (".md", ".pdf")
                 and any(term in p.stem for term in ("投保及核保规则", "投核保规则"))
             ],
         }

@@ -9,10 +9,47 @@ import json
 import os
 import time
 from collections import Counter
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
 from applications.insurance import manage
+
+MERGE_CACHE_POLICY = "replay-active-evidence-without-summary-cache-v1"
+
+
+class EvidenceReplayCache:
+    """Keep native extraction caches while always replaying active merge evidence.
+
+    A native summary prompt may omit over-budget descriptions and therefore be
+    identical across different active document scopes. Its cached result cannot
+    stand in for the evidence adapter, whose result also depends on that scope.
+    All writes, bulk reads (including extraction recovery), and lifecycle calls
+    continue to use the original storage.
+    """
+
+    def __init__(self, storage):
+        self._storage = storage
+
+    def __getattr__(self, name):
+        return getattr(self._storage, name)
+
+    async def get_by_id(self, key):
+        row = await self._storage.get_by_id(key)
+        if row is not None and row.get("cache_type") == "summary":
+            return None
+        return row
+
+
+@contextmanager
+def replay_merge_cache(rag):
+    """Limit summary-cache bypass to ingestion; exports read unmodified rows."""
+    original = rag.llm_response_cache
+    rag.llm_response_cache = EvidenceReplayCache(original)
+    try:
+        yield
+    finally:
+        rag.llm_response_cache = original
 
 
 def append_event(path: Path, event: dict[str, Any]) -> None:
@@ -246,7 +283,14 @@ def incremental_replay_adapter(
     return adapter
 
 
-def readback_files(target: Path, documents: list, approved: dict) -> dict:
+def readback_files(
+    target: Path,
+    documents: list,
+    approved: dict,
+    *,
+    embedding_token_limit: int | None = None,
+    tokenizer=None,
+) -> dict:
     """Read the closed file-backed batch and verify persisted native evidence."""
     import networkx as nx
 
@@ -256,6 +300,13 @@ def readback_files(target: Path, documents: list, approved: dict) -> dict:
         sanitize_and_normalize_extracted_text,
     )
     from lightrag.utils_pipeline import normalize_document_file_path
+
+    if embedding_token_limit is not None and (
+        embedding_token_limit <= 0 or tokenizer is None
+    ):
+        raise ValueError(
+            "Bounded vector verification requires a positive limit and tokenizer"
+        )
 
     def normalized(text):
         return canonical(sanitize_and_normalize_extracted_text(text))
@@ -320,6 +371,29 @@ def readback_files(target: Path, documents: list, approved: dict) -> dict:
         errors.append(
             "Persisted graph relations differ from the complete approved scope"
         )
+    bounded_entity_vectors = []
+    if embedding_token_limit is not None:
+        for name, node in graph.nodes(data=True):
+            full_content = f"{name}\n{node['description']}"
+            # This is the native _truncate_vdb_content contract, including
+            # independent re-encoding of the exact Unicode prefix.
+            span = tokenizer.truncate_by_token_limit(
+                full_content, embedding_token_limit
+            )
+            expected = full_content[span.start : span.end]
+            vector = entity_vectors.get(name)
+            if vector is None or vector.get("content") != expected:
+                errors.append(f"Entity vector lost native bounded content: {name}")
+            if span.end < len(full_content):
+                bounded_entity_vectors.append(
+                    {
+                        "entity_name": name,
+                        "embedding_token_limit": embedding_token_limit,
+                        "graph_content_tokens": len(tokenizer.encode(full_content)),
+                        "vector_content_tokens": span.token_count,
+                        "representation": "exact native prefix; full evidence retained in graph and chunks",
+                    }
+                )
     for item in approved.values():
         native = item["native"]
         for entity in native["entities"]:
@@ -331,8 +405,9 @@ def readback_files(target: Path, documents: list, approved: dict) -> dict:
             description = entity["description"]
             if not preserves_evidence(description, node["description"]):
                 errors.append(f"Graph entity lost approved evidence: {name}")
-            if name not in entity_vectors or not preserves_evidence(
-                description, entity_vectors[name]["content"]
+            if embedding_token_limit is None and (
+                name not in entity_vectors
+                or not preserves_evidence(description, entity_vectors[name]["content"])
             ):
                 errors.append(f"Entity vector lost approved evidence: {name}")
         for relation in native["relationships"]:
@@ -371,6 +446,14 @@ def readback_files(target: Path, documents: list, approved: dict) -> dict:
         "entities": graph.number_of_nodes(),
         "relationships": graph.number_of_edges(),
         "vectors": {name: len(rows) for name, rows in vector_rows.items()},
+        "vector_content_verification": {
+            "policy": "exact native entity content with configured token bound"
+            if embedding_token_limit is not None
+            else "complete approved evidence",
+            "embedding_token_limit": embedding_token_limit,
+            "bounded_entity_count": len(bounded_entity_vectors),
+            "bounded_entities": bounded_entity_vectors,
+        },
         "errors": errors,
         "technical_passed": not errors,
         "business_acceptance": "pending native retrieval and answer review",
@@ -603,7 +686,15 @@ async def _apply_batch(
                 current.update(extra)
         validate_additions(old_documents, documents)
         persisted = database_before if database else target
-        old_report = readback_files(persisted, old_documents, old_approved)
+        from lightrag.utils import TiktokenTokenizer
+
+        old_report = readback_files(
+            persisted,
+            old_documents,
+            old_approved,
+            embedding_token_limit=int(config["EMBEDDING_TOKEN_LIMIT"]),
+            tokenizer=TiktokenTokenizer(),
+        )
         snapshot = snapshot_for_batches(
             manage.ROOT, config["WORKSPACE"], historical_batches, registry
         )
@@ -670,6 +761,7 @@ async def _apply_batch(
                     )
                 },
                 "native_system": native_system,
+                "merge_cache_policy": MERGE_CACHE_POLICY,
             },
             ensure_ascii=False,
             sort_keys=True,
@@ -856,6 +948,7 @@ async def _apply_batch(
             "workspace": config["WORKSPACE"],
             "model": config["EXTRACT_LLM_MODEL"],
             "merge_validation": "position-based evidence replay; no provider call during merge",
+            "merge_cache_policy": MERGE_CACHE_POLICY,
             "approved_chunks": len(approved),
             "summary_max_tokens": rag.summary_max_tokens,
             "summary_context_size": rag.summary_context_size,
@@ -896,38 +989,41 @@ async def _apply_batch(
     database_after = None
     try:
         await rag.initialize_storages()
-        for entry, payload in documents:
-            adapter.activate_sources([Path(entry["relative_path"]).name])
-            receipt = {
-                "file": entry["ingestion_label"],
-                "state": "sending",
-                "source_sha256": entry["sha256"],
-                "started_time": time.time(),
-            }
-            receipts.append(receipt)
-            manage.save_json(manage.RECEIPTS, receipts)
-            track = await rag.ainsert(
-                payload["text"],
-                split_by_character=payload["chunking"]["params"]["split_by_character"],
-                split_by_character_only=True,
-                file_paths=entry["ingestion_label"],
-            )
-            statuses = await rag.doc_status.get_docs_by_track_id(track)
-            states = {
-                key: DocStatus(item.status).value for key, item in statuses.items()
-            }
-            receipt.update(
-                state="processed"
-                if states and all(state == "processed" for state in states.values())
-                else "not_processed",
-                track_id=track,
-                documents=states,
-            )
-            manage.save_json(manage.RECEIPTS, receipts)
-            if receipt["state"] != "processed":
-                raise RuntimeError(
-                    "Native document did not finish; inspect original status"
+        with replay_merge_cache(rag):
+            for entry, payload in documents:
+                adapter.activate_sources([Path(entry["relative_path"]).name])
+                receipt = {
+                    "file": entry["ingestion_label"],
+                    "state": "sending",
+                    "source_sha256": entry["sha256"],
+                    "started_time": time.time(),
+                }
+                receipts.append(receipt)
+                manage.save_json(manage.RECEIPTS, receipts)
+                track = await rag.ainsert(
+                    payload["text"],
+                    split_by_character=payload["chunking"]["params"][
+                        "split_by_character"
+                    ],
+                    split_by_character_only=True,
+                    file_paths=entry["ingestion_label"],
                 )
+                statuses = await rag.doc_status.get_docs_by_track_id(track)
+                states = {
+                    key: DocStatus(item.status).value for key, item in statuses.items()
+                }
+                receipt.update(
+                    state="processed"
+                    if states and all(state == "processed" for state in states.values())
+                    else "not_processed",
+                    track_id=track,
+                    documents=states,
+                )
+                manage.save_json(manage.RECEIPTS, receipts)
+                if receipt["state"] != "processed":
+                    raise RuntimeError(
+                        "Native document did not finish; inspect original status"
+                    )
         if database:
             from applications.insurance.database_storage import (
                 capture_database_snapshot,
@@ -944,7 +1040,13 @@ async def _apply_batch(
     finally:
         await rag.finalize_storages()
     persisted = database_after if database else target
-    report = readback_files(persisted, [*old_documents, *documents], all_approved)
+    report = readback_files(
+        persisted,
+        [*old_documents, *documents],
+        all_approved,
+        embedding_token_limit=rag.embedding_token_limit,
+        tokenizer=rag.tokenizer,
+    )
     report["workspace"] = config["WORKSPACE"]
     report["storage"] = backend
     manage.save_json(manage.OUTPUT / "final-code-readback.json", report)

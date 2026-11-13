@@ -14,7 +14,7 @@ make -f applications/insurance/Makefile status
 .venv/bin/python -m applications.insurance.evidence_import --help
 ```
 
-`docs/insurance_docs/`、`output/<batch>/`、`rag_storage/` 和 `inputs/` 保持原位。当前只维护数据库 `master`，保留 `output/master/`、`output/workspaces/master/`、已登记的 `output/database-master-initial/`、`output/master-product-6/`、`output/master-product-7/`、当前 `output/logs/` 及数据库恢复备份。旧测试工作区、旧顶层批次和独立历史报告已按用户要求清理，9621、9622旧服务已关闭；后文历史段落中的路径和端口仅说明当时事实，不能作为当前操作入口。
+`docs/insurance_docs/`、`output/<batch>/`、`rag_storage/` 和 `inputs/` 保持原位。当前只维护数据库 `master`，保留 `output/master/`、`output/workspaces/master/`、已登记的 `output/database-master-initial/`、`output/master-product-6/`、`output/master-product-7/`、`output/master-products-8-10/`、当前 `output/logs/` 及数据库恢复备份。旧测试工作区、旧顶层批次和独立历史报告已按用户要求清理，9621、9622旧服务已关闭；后文历史段落中的路径和端口仅说明当时事实，不能作为当前操作入口。
 
 保险应用统一使用 `applications.insurance` 的模块和命令，原 `product/` 目录及全部转发入口已删除。保险服务统一通过 `applications.insurance.server` 启动；业务源码、测试和当前操作文档只维护这一套入口。
 
@@ -39,6 +39,12 @@ make -f applications/insurance/Makefile status
 随后在 `output/master-product-7-fixes/` 完成上述5项已核修复：问答增加来源约束及明确冲突检查，补足额外产品断言、周年日界点、完整指数、犹豫期起点/时长与退保损失模态；两个材料节点及对应关系改为保全分类，原抽取缓存和关系向量同步修正。独立数据库核验56项通过，7产品及21/563/680/843的文档、片段、实体和关系数量不变，旧台账、原件、恢复锚点及来源保留。两处真实片段用原flash模型重新抽取各一次，均得到保全材料及关系；未来抽取用途不明或分类错误会拒绝核准，要求重新选证。
 
 修复复验逐轮独立保留：v7首轮7题交付、1题非法引用拒答；v8第二轮8题交付，仍发现无依据的“现金价值通常低于保费”；v9第三轮8个主问核心正确，其中7份达到完整精度要求，增长比较仍省略了三项取大的阶段。补齐“三者／三个比较项”等价表达检查后，该增长题单独复验通过。原来的3项答复问题和2组分类均有独立通过证据，汇总为 `independent-targeted-fix-summary.json`；**没有把多轮结果拼成最终源码的同轮8/8通过**，旧演示假设与重复条件节点风险也未宣称解决。修复汇总为 `fix-summary.json`，各轮失败报告均未覆盖。
+
+批次 `master-products-8-10` 继续向同一master追加**京福宏运（尊享版）终身寿险（分红型）**、**京富盈利（七周年版）年金保险**和**京康岁悦长期护理保险**，各3份资料，分别82、58、93片段，合计9文档233片段。当前累计为**10产品、30文档、796片段、952实体、1137关系**，缓存918条。准备器已支持原生PDF投核保规则，仍拒绝同一角色出现多个候选。本轮按用户要求只验证新增产品，没有重跑旧7款问答或另做旧产品业务核验。
+
+首次写入的原生读回发现共享机构摘要缓存跨激活来源重复使用，漏合并后两款机构证据；在停写锁和备份下，仅从核准来源恢复一个机构节点的完整描述、清理一条空摘要输入的错误缓存，没有重抽取或重导文档。导入入口现仅在写入期间绕过摘要缓存读取，保留抽取缓存和原有快照生命周期。向量仍严格采用原生8192 token前缀，完整证据保留在图谱、片段和抽取缓存；读回精确核对前缀并显式记录共享机构的长度限制，不把有界向量正文宣称为全文。修复后原增量安全检查及登记完成，初次失败、修复journal和新读回报告分别保留；导入相关回归71项、2个子测试及Ruff通过。
+
+新增3款技术验收6898项通过；12道新产品问题各问一次，11题交付。独立业务评审为7题完整通过、3题精度备注、1题含额外推断、1题未交付：宏运身故题因“N的含义”表达未被检查器识别而误拒，七周年满期/身故题额外推断生存金间接影响现金价值，精度遗漏涉及零时生存条件、解除通知的终止时点及护理状态释义。新图谱另有一处“6种疾病”误命名为“7种”的节点及一条关联边，业务验收未全部通过。报告为该批 `business-review.json`、`new-products-technical-acceptance.json`，各产品原件依据和细项位于 `source-reviews/`，总记录为 `import-summary.json`。未用重问或正确草稿补全失败结果。
 
 初次数据库迁移验收为46项导出对照、26项独立SQL/Neo4j只读核验全通过；PostgreSQL原生备份已实际恢复到临时数据库验证，测试库随后删除。相关离线回归763项、Ruff通过。6题真实HTTP的核心结论均通过并完成交付，仍保留3题精度备注，尤其优护回答出现无同次原文依据的“如100%”“通常高于60%”附加话术；单次小样本不代表通用准确率，也不能将问答改善归因于更换存储。以上为初次数据库迁移时的历史验收记录；对应独立测试报告已清理，保留的原生备份及其摘要、恢复验证记录见 [DATABASE.md](DATABASE.md)。
 
@@ -129,14 +135,14 @@ v2基线技术读回已通过，WebUI可同步测试；业务准确性验收尚�
 
 ## 当前入口与模型
 
-- 当前累计7款 WebUI：<http://127.0.0.1:9623/webui/>；问答：<http://127.0.0.1:9623/workspace/>。
+- 当前累计10款 WebUI：<http://127.0.0.1:9623/webui/>；问答：<http://127.0.0.1:9623/workspace/>。
 - 默认服务配置及固定工作区均为 `master`；实际产品以 `output/workspaces/master/registry.json` 为准，新增导入使用各自批次记录。
 - 回答：`qwen3.7-plus`，`enable_thinking=false`；抽取和关键词：`qwen3.8-flash`，关闭思考。
 - 向量：`qwen3.7-text-embedding`，1024 维，输入上限8192 token。
 - 重排：`RERANK_BINDING=aliyun`、`RERANK_MODEL=qwen3.7-text-rerank`，使用已验证的原生阿里云接口。
 - 当前查询配置：`mix`、空历史、阿里云 `qwen3.7-text-rerank` 重排、`KG_CHUNK_PICK_METHOD=WEIGHT`、Top-K 30、片段12、实体2000 / 关系2500 / 总计18000 token。v2/v3及v5初轮的实体4000/关系5000、VECTOR配置作为历史基线保留；v5通过公开参数为完整原文留预算，组合变化的效果不能只归因于提示。实际准确率与延迟须以本批真实报告为准。
 
-`.env` 的旧机器路径已经改为本项目路径；凭据仅保存在权限600的忽略文件。默认管理入口读取 `output/master/runtime.env`，当前 `PROMPT_DIR` 指向 `output/master-product-7-fixes/prompt_profiles` 的冻结修复配置，回答日志也写入该修复目录。该目录记录同一master的已核更正，不是新产品或新工作区。更改根 `.env` 不会覆盖已固定的批次配置；已完成导入批次的提示、合同、台账和回执保持原样。每批验证结论只适用于其实际快照。
+`.env` 的旧机器路径已经改为本项目路径；凭据仅保存在权限600的忽略文件。默认管理入口读取 `output/master/runtime.env`，当前 `PROMPT_DIR` 指向 `output/master-products-8-10/prompt_profiles` 的冻结副本，与前一服务的提示内容一致；回答日志写入该批目录。`output/master-product-7-fixes/` 继续保存同一master的已核更正。更改根 `.env` 不会覆盖已固定的批次配置；已完成导入批次的提示、合同、台账和回执保持原样。每批验证结论只适用于其实际快照。
 
 ## 资料与处理方式
 

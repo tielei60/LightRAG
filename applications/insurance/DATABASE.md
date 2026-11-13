@@ -54,7 +54,7 @@ make -f applications/insurance/Makefile stop
 
 累计登记为 `output/workspaces/master/registry.json`，包含后端、数据库地址、向量模型/维度和已完成批次。初次重导和后续追加均在全库证据、图谱、向量及原数据保留校验通过后登记。
 
-旧文件库及旧顶层测试批次已清理。初始批次已将必要准备产物复制进自身 `sources/`，当前master的运行、核验和追加依赖登记的 `database-master-initial`、`master-product-6`、`master-product-7`，不递归读取旧来源批次。默认9623服务使用数据库 `master`。
+旧文件库及旧顶层测试批次已清理。初始批次已将必要准备产物复制进自身 `sources/`，当前master的运行、核验和追加依赖登记的 `database-master-initial`、`master-product-6`、`master-product-7`、`master-products-8-10`，不递归读取旧来源批次。默认9623服务使用数据库 `master`。
 
 ## 后续新增产品
 
@@ -77,7 +77,7 @@ make -f applications/insurance/Makefile start
 
 ## 备份和以后上线迁移
 
-初次五产品数据库迁移的停写窗口生成了 `output/database-migration/native-backup/`：PostgreSQL custom dump、Neo4j原生dump和不含凭据的产品资料归档。摘要及恢复验证保留在该目录同级的 `native-backup-manifest.json`、`cutover-plan.json`、`postgres-restore-test.json`。这些原生dump对应前5款15文档/412片段时点，不包含后续第6、7款追加；它们不是当前7款master的最新备份。导出的主工作区快照可用于逐行核对，但不能替代原生dump；它不包含所有数据库级索引、扩展和管理对象。
+初次五产品数据库迁移的停写窗口生成了 `output/database-migration/native-backup/`：PostgreSQL custom dump、Neo4j原生dump和不含凭据的产品资料归档。摘要及恢复验证保留在该目录同级的 `native-backup-manifest.json`、`cutover-plan.json`、`postgres-restore-test.json`。这些原生dump对应前5款15文档/412片段时点，不包含后续追加；它们不是当前10款master的最新备份。导出的主工作区快照可用于逐行核对，但不能替代原生dump；它不包含所有数据库级索引、扩展和管理对象。
 
 PostgreSQL 使用与服务器匹配的17版工具，备份/恢复示例：
 
@@ -108,7 +108,11 @@ neo4j-admin database load neo4j --from-path=/absolute/backup/directory
 
 `master-product-6` 已向相同数据库master追加京福宏裕（尊享版）终身寿险（分红型），新增3文档82片段，当时累计6产品、18文档、494片段、597实体、754关系，全库及原有5产品的数据保留校验通过。
 
-`master-product-7` 通过完全切分后的 `applications.insurance` 入口追加京福盈嘉终身寿险，新增3文档69片段，当前累计7产品、21文档、563片段、680实体、843关系。独立只读SQL/Cypher核验47项通过，旧18文档、494片段、恢复锚点逐行一致，旧561缓存完整保留，累计640缓存（563抽取、77摘要）；原有非master的30个Neo4j节点保留，跨工作区边为0。服务仍为9623的master，模型和预算沿用，控制配置只更新了冻结提示与回答日志路径。
+`master-product-7` 通过完全切分后的 `applications.insurance` 入口追加京福盈嘉终身寿险，新增3文档69片段，当时累计7产品、21文档、563片段、680实体、843关系。独立只读SQL/Cypher核验47项通过，旧18文档、494片段、恢复锚点逐行一致，旧561缓存完整保留，累计640缓存（563抽取、77摘要）；原有非master的30个Neo4j节点保留，跨工作区边为0。
+
+`master-products-8-10` 追加宏运（尊享版）、京富盈利（七周年版）和京康岁悦，新增9文档233片段，当前累计10产品、30文档、796片段、952实体、1137关系，缓存918条。验证只覆盖新增3款，未重跑旧产品问答；入口自带写锁、备份和增量安全检查仍保留。服务仍为9623的master，模型和预算沿用，控制配置仅更新冻结提示与回答日志路径。
+
+首次写入后共享承保机构的摘要缓存复用了空输入下的旧结果，已在写锁和备份下恢复一个机构节点描述、清理一条错误摘要缓存，未重抽取或重导文档。初次失败报告保留，修复及完成登记记录为该批 `shared-insurer-repair-journal.json`、`append-recovery-result.json` 和 `closed-writer-recovery-readback.json`。实体向量正文按原生8192 token限制精确校验；完整来源证据另由图谱、片段、抽取缓存及来源追踪保留，不能将向量前缀误报为完整原文。新增技术验收为 `new-products-technical-acceptance.json`，业务结果及未通过问题见 `business-review.json`。
 
 两次追加的数据库写前快照、写后导出和journal分别保存在对应批次目录；第7款独立核验为 `output/master-product-7/independent-database-acceptance.json`。最新累计来源以 `output/workspaces/master/registry.json` 为准。
 
